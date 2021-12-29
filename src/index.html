@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="./styling/style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div id="nav" class="shadowed">
+            <ul>
+                <li>
+                    <img src="./assets/icon.png">
+                </li>
+                <li>
+                    <h1>ViSync</h1>
+                </li>
+                <li>
+                    <img id="server-icon" src="./assets/server.png">
+                </li>
+            </ul>
+        </div>
+        <div id="content" class="shadowed">
+            <div class="space"></div>
+            <div class="centered container">
+                <p><b>Getting started:</b><br>
+                    First, navigate to a compatible video streaming site.<br>
+                    <br>To create a room, click the "Create a room" button and send the resulting room link to your friends.<br>
+                    <br>If someone already made a room, enter the link after clicking "Join a room" and you will be synced through one of our servers.<br>
+                    <br>Have fun!</p>
+            </div>
+            <button type="button" class="button centered shadowed2" style="margin-bottom: 8px;"><b>Create a room</b></button>
+            <button type="button" class="button centered shadowed2"><b>Join a room</b></button>
+        </div>
+
+        <!-- Overlays -->
+        <div id="loading-page" class="overlay hidden">
+            <div class="space"></div>
+            
+            <div>
+                <h1 id="loading-label">Locating video...</h1>
+            </div>
+            <div id="loading-circle" class="centered shadowed"></div>
+        </div>
+
+        <div id="connection-page" class="overlay hidden">
+            <h1>asdfasdf</h1>
+        </div>
+    </body>
+    <script src="./scripts/index.js" type="module"></script>
+</html>

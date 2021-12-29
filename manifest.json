@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "testarea",
+    "version": "0.01",
+    "description": "_",
+    "background": {
+        "service_worker": "worker.js",
+        "type": "module"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": ["<all_urls>"],
+    "action": {
+        "default_popup": "./src/index.html"
+    }
+}
