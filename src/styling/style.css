@@ -14,15 +14,16 @@ html {
 
     --space-padding-bottom: 35px;
 
-    --colors-nav: #99aead;
-    --colors-background: #c4cdc1;
-    --colors-content: #F2EFE9;
+    --colors-nav: rgb(153, 174, 173);
+    --colors-background: rgb(196, 205, 193);
+    --colors-content: rgb(242, 239, 233);
     --colors-content-text: rgb(93, 93, 93);
-    --colors-loading-page: #28363d;
+    --colors-loading-page: rgb(40, 54, 61);
     --colors-loading-circle-border1: var(--colors-loading-page);
     --colors-loading-circle-border2: var(--colors-content);
     --colors-loading-label-success: rgb(119, 212, 85);
     --colors-loading-label-failure: rgb(212, 85, 85);
+    --colors-button-hover: rgb(159, 180, 179);
 
     --fonts-global: 'Open Sans', sans-serif;
 
@@ -109,6 +110,8 @@ img#server-icon:hover {
     text-align: center;
     color: var(--colors-content);
     padding-bottom: 10px;
+    padding-top: 15px;
+
 }
 
 #loading-label.success {
@@ -201,4 +204,9 @@ img#server-icon:hover {
     font-size: 15px;
     width: 90%;
     display: block;
+}
+
+.button:hover {
+    transform: translateY(-1px);
+    background-color: var(--colors-button-hover);
 }

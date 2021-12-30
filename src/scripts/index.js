@@ -1,6 +1,33 @@
-// Handles server selection popup window
-let serverWindow = null;
 
+// Global variables
+let serverWindow = null;
+var loader = document.getElementById('loading-page');
+var loaderLabel = document.getElementById('loading-label');
+
+// Prototypes
+Object.prototype.get = (key, obj) =>  {
+    for (const [_key, _value] of Object.entries(obj)) {
+        if (key === _key) {
+            return _value;
+        }
+    } 
+}
+
+function addClasses(element, classList) {
+    for (let i = 0; i < classList.length; i++) {
+        element.classList.add(classList[i]);
+    }
+}
+
+function removeClasses(element, classList) {
+    for (let i = 0; i < classList.length; i++) {
+        element.classList.remove(classList[i]);
+    }
+}
+
+
+
+// Handles server selection popup window
 document.getElementById('server-icon').addEventListener('click', (e) => {
     console.log('clicked');
 
@@ -16,41 +43,60 @@ document.getElementById('server-icon').addEventListener('click', (e) => {
         left=${posX}`
     );
 
-    serverWindow.onload = () => {
-        serverWindow.document.querySelector('button').addEventListener('click', (e) => {
-            console.log('yoooooooo');
-        })
-    }
-
-    serverWindow.addEventListener('blur', (e) => {
-        console.log('asldfkjasl;dkfj')
-        serverWindow.close();
-    })
+    serverWindow.addEventListener('blur', () => serverWindow.close());
  
+});
+
+
+document.getElementById('create-btn').addEventListener('click', () => {
+
+//  Starting loader
+    removeClasses(loader, ['hidden']);
+    addClasses(loader, ['shifted-up', 'visible']);
+
+
+    checkVideoStatus().then(data => {
+        if (data) {
+            loaderLabel.innerHTML = 'Video player loaded &#10004;';
+            addClasses(loaderLabel, ['success']);
+
+            setTimeout(() => {
+                loaderLabel.innerHTML = 'Connecting to server...';
+                removeClasses(loaderLabel, ['success']);
+                checkConnectionStatus();
+            }, 50);
+        } else {
+            loaderLabel.innerHTML = 'Video not found &#10005;';
+            addClasses(loaderLabel, ['failure']);
+
+            setTimeout(() => {
+                loaderLabel.innerHTML = 'Connecting to server...';
+                removeClasses(loaderLabel, ['success']);
+                checkConnectionStatus();
+            }, 50);
+        }
+    });
 })
 
-window.onload = () => {
-    console.log(document.getElementsByClassName('page'))
+
+function checkVideoStatus() {
+    const waitingTime = 400;
+    const keyName = 'foundVideo';
+    const msg = 'check video';
+
+    console.log('checking for video');
+    chrome.runtime.sendMessage({ message: msg });
+
+    return new Promise((resolve, reject) => setTimeout(() => {
+        chrome.storage.local.get(keyName).then((data) => {
+            resolve(Object.get(keyName, data));
+        }).catch(err => reject(err));
+    }, waitingTime));
 }
 
-// document.addEventListener('click', (e) => {
-//     console.log('asdlfkjasdlasdfasdfasdf');
-    
-//     let lp = document.getElementById('loading-page');
 
-//     if (lp.classList.contains('show')) {
-//         lp.classList.remove('show');
-//         setTimeout(() => lp.classList.remove('shifted-up'), 100); // Ensures that the z-index is changed last
-
-//     } else {
-//         lp.classList.add('shifted-up')
-//         lp.classList.add('show');
-//     }
-
-// })
+function checkConnectionStatus() {
+    chrome.runtime.sendMessage({ message: 'check connection'});
 
 
-
-
-// Video player loaded &#10004;
-// Video not found &#10005;
+}

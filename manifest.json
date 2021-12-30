@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "testarea",
+    "name": "ViSync",
     "version": "0.01",
-    "description": "_",
+    "description": "An extension to ",
     "background": {
         "service_worker": "worker.js",
         "type": "module"
