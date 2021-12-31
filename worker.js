@@ -1,11 +1,11 @@
 import connect from './src/scripts/modules/connect.js';
 import servers from './src/scripts/modules/servers.js';
-
+import messages from './src/scripts/modules/messages.js';
+import scan from './src/scripts/modules/scan.js';
 
 function injectionPath(fileName) {
     return `./src/scripts/injections/${fileName}.js`;
 }
-
 
 function getActiveId() {
     return new Promise(resolve => {
@@ -19,22 +19,21 @@ function getActiveId() {
 }
 
 chrome.runtime.onMessage.addListener((request) => {
-    if (request.message === 'check video') {
-
+    if (request.message === messages.video.locate) {
         getActiveId().then(tabId => {
             chrome.scripting.executeScript({
-                target: {tabId: tabId },
-                files: [injectionPath('scan')]
+                target: { tabId: tabId },
+                func: scan,
+                args: [messages.video.status]
             });
         });
 
-    } else if (request.message === 'check connection') {
-        
+    } else if (request.message === messages.server.connect) {
         getActiveId().then(tabId => {
             chrome.scripting.executeScript({
-                target: {tabId: tabId },
+                target: { tabId: tabId },
                 func: connect,
-                args: [servers[0]]
+                args: [servers[0], messages.server.status]
             });
         });
     }

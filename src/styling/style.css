@@ -25,6 +25,9 @@ html {
     --colors-loading-label-failure: rgb(212, 85, 85);
     --colors-button-hover: rgb(159, 180, 179);
 
+    --colors-scrollbar: rgb(185 185 185);
+    --colors-scrollbar-thumb: rgb(155 155 155);
+
     --fonts-global: 'Open Sans', sans-serif;
 
 }
@@ -141,20 +144,59 @@ img#server-icon:hover {
 }
 
 /* Connection page */
-#connection-page {
-    background-color: aqua;
+#create-page {
+    background-color: var(--colors-content); 
+    font-size: 16px;
+}
+
+#room-code-scroll-pane {
+    overflow-x: scroll;
+    width: 100%;
+    height: 50px;
+    scrollbar-width: thin;
+    vertical-align: middle;
+    text-align: center;
+    line-height: 40px;  
+    background-color: var(--colors-loading-page);
+    color: var(--colors-content);
+
+}
+
+#room-code-scroll-pane label {
+    --padding: 5px;
+    padding-left: var(--padding); 
+    padding-right: var(--padding);
 }
 
 
+#room-code-scroll-pane::-webkit-scrollbar {
+    height: 10px;
+    background-color: var(--colors-scrollbar);
+}
+
+
+#room-code-scroll-pane::-webkit-scrollbar-thumb {
+    background-color: var(--colors-scrollbar-thumb);
+    border-radius: 50px;
+}
+
+#user-list {
+    height: 193px;
+    overflow: auto;
+    background-color: var(--colors-loading-page)
+}
 
 /* Classes */
 .shadowed {
     box-shadow: 0 0px 8px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* Classes */
 .shadowed2 {
     box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.shadowed3 {
+    box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .space {
@@ -181,6 +223,7 @@ img#server-icon:hover {
 
 .visible {
     opacity: 1;
+    /* transition: opacity 1s ease-in; */
 }
 
 .shifted-up {

@@ -1,16 +1,14 @@
+import messages from './modules/messages.js';
 
 // Global variables
 let serverWindow = null;
 var loader = document.getElementById('loading-page');
 var loaderLabel = document.getElementById('loading-label');
 
-// Prototypes
-Object.prototype.get = (key, obj) =>  {
-    for (const [_key, _value] of Object.entries(obj)) {
-        if (key === _key) {
-            return _value;
-        }
-    } 
+
+loaderLabel.update = (text=null, classAction=null, args=null) => { 
+    loaderLabel.innerHTML = text == null ? loaderLabel.innerHTML : text;
+    classAction != null ? classAction(loaderLabel, args) : null;
 }
 
 function addClasses(element, classList) {
@@ -25,12 +23,16 @@ function removeClasses(element, classList) {
     }
 }
 
+function wait(time, callback = () => {}) {
+    return new Promise((resolve) => setTimeout(() => {
+        callback();
+        resolve();
+    }, time));
+}
 
 
 // Handles server selection popup window
 document.getElementById('server-icon').addEventListener('click', (e) => {
-    console.log('clicked');
-
     const popupWidth = 275;
     const popupHeight = 350;
     const posX = window.top.outerWidth / 2 + window.top.screenX - ( popupWidth / 2);
@@ -43,60 +45,99 @@ document.getElementById('server-icon').addEventListener('click', (e) => {
         left=${posX}`
     );
 
-    serverWindow.addEventListener('blur', () => serverWindow.close());
+    serverWindow.addEventListener('blur', serverWindow.close);
  
 });
 
 
-document.getElementById('create-btn').addEventListener('click', () => {
+document.getElementById('create-btn').addEventListener('click', async () => {
 
 //  Starting loader
     removeClasses(loader, ['hidden']);
     addClasses(loader, ['shifted-up', 'visible']);
+    const waitTime =  200;
+    const resetLoader = async () => {
+        removeClasses(loader, ['visible']);
+        addClasses(loader, ['hidden']);
+        await wait(waitTime);
+        removeClasses(loader, ['shifted-up']);
+        loaderLabel.update('Locating video...', removeClasses, ['failure', 'success']);
+    }
 
+    checkVideoStatus().then(async data => {
 
-    checkVideoStatus().then(data => {
         if (data) {
-            loaderLabel.innerHTML = 'Video player loaded &#10004;';
-            addClasses(loaderLabel, ['success']);
+            loaderLabel.update('Video player loaded &#10004;', addClasses, ['success']);
 
-            setTimeout(() => {
-                loaderLabel.innerHTML = 'Connecting to server...';
-                removeClasses(loaderLabel, ['success']);
-                checkConnectionStatus();
-            }, 50);
+            await wait(waitTime);
+
+            loaderLabel.update('Connecting to server...', removeClasses, ['success']);
+            checkConnectionStatus().then(async result => {
+                if (result) {
+                    loaderLabel.update('Connection successful &#10004;', addClasses, ['success']);
+                    startRoom();
+                } else {
+                    loaderLabel.update('Failed to connect &#10005;', addClasses, ['failure']);
+                    await wait(waitTime, resetLoader);
+                }
+            });
+
         } else {
-            loaderLabel.innerHTML = 'Video not found &#10005;';
-            addClasses(loaderLabel, ['failure']);
-
-            setTimeout(() => {
-                loaderLabel.innerHTML = 'Connecting to server...';
-                removeClasses(loaderLabel, ['success']);
-                checkConnectionStatus();
-            }, 50);
+            loaderLabel.update('Video not found &#10005;', addClasses, ['failure']);
+            await wait(waitTime, resetLoader);
         }
     });
 })
 
 
 function checkVideoStatus() {
-    const waitingTime = 400;
-    const keyName = 'foundVideo';
-    const msg = 'check video';
+    let result = false;
+    let onMessage = chrome.runtime.onMessage;
+    const waitTime = 400;
+    const checkVideoMessage = (event) => {
+        if (event.message === messages.video.status) {
+            result = event.data === 'true';
+        }
+    }
 
-    console.log('checking for video');
-    chrome.runtime.sendMessage({ message: msg });
+    chrome.runtime.sendMessage({ message: messages.video.locate });
+    onMessage.addListener(checkVideoMessage);
 
-    return new Promise((resolve, reject) => setTimeout(() => {
-        chrome.storage.local.get(keyName).then((data) => {
-            resolve(Object.get(keyName, data));
-        }).catch(err => reject(err));
-    }, waitingTime));
+    return new Promise(async (resolve) => {
+        await wait(waitTime);
+        onMessage.removeListener(checkVideoMessage);
+        resolve(result);
+    });
 }
 
-
 function checkConnectionStatus() {
-    chrome.runtime.sendMessage({ message: 'check connection'});
+    let connected = false;
+    let retries = 40;
+    let onMessage = chrome.runtime.onMessage;
+    const waitTime = 500;
+    const checkConnectionMessage = (event) => {
+        if (event.message === messages.server.status) {
+            connected = true;
+        }
+    }
+
+    chrome.runtime.sendMessage({ message: messages.server.connect });
+    onMessage.addListener(checkConnectionMessage);
+
+    return new Promise((resolve) => {
+        const loop = setInterval(() => {
+            if (connected || retries < 1) {
+                resolve(connected);
+                onMessage.removeListener(checkConnectionMessage);
+                clearInterval(loop);
+            }
+            retries--; 
+        }, waitTime);
+    });
+
+}
+
+function startRoom() {
 
 
 }
