@@ -1,0 +1,94 @@
+
+body {
+    font-size: 15px;
+}
+
+button {
+    height: 43px;
+    font-size: 15px;
+}
+
+
+.anim {
+    background: linear-gradient(to left, #cc9eb8, #848de9,  #7c83eb, #8a7acc,#c89ad3);
+    background-size: 1000% 1000%;
+    animation: background-gradient 5s ease infinite;
+}
+
+
+@keyframes background-gradient {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    50% {   
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+
+
+.anim span {
+    animation: loading-text 1s infinite;
+}
+
+@keyframes loading-text {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+/* "Loading" characters */
+.anim b span:nth-child(1) {
+    animation-delay: 0s
+}
+
+.anim b span:nth-child(2) {
+    animation-delay: .1s
+}
+
+.anim b span:nth-child(3) {
+    animation-delay: .2s
+}
+
+.anim b span:nth-child(4) {
+    animation-delay: .3s
+}
+
+.anim b span:nth-child(5) {
+    animation-delay: .4s;
+}
+
+.anim b span:nth-child(6) {
+    animation-delay: .5s
+}
+
+.anim b span:nth-child(7) {
+    animation-delay: .6s
+}
+
+/* Ellipsis */
+.anim b span:nth-child(8) {
+    animation-delay: 0s
+}
+
+.anim b span:nth-child(9) {
+    animation-delay: .1s
+}
+
+.anim b span:nth-child(10) {
+    animation-delay: .2s
+}

@@ -1,0 +1,62 @@
+html {
+
+    /* Variables */
+    --body-width: 325px;
+    --button-border-radius: 3px;
+    --container-width: 95%;
+    --space-padding-bottom: 35px;
+
+
+    --colors-background: rgb(36, 36, 36);
+    --colors-button: rgb(124, 158, 178);
+    --colors-button-hover: rgb(159, 180, 179);
+    --colors-text: rgb(223, 224, 226);
+
+    --fonts-global: 'Montserrat', sans-serif;
+
+}
+
+body {
+    width: var(--body-width); 
+    background-color: var(--colors-background);
+    font-family: var(--fonts-global);
+    color: var(--colors-text);
+}
+
+/* Classes */
+.shadowed {
+    box-shadow: 0 0px 8px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.shadowed2 {
+    box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.shadowed3 {
+    box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.space {
+    padding-bottom: var(--space-padding-bottom); 
+}
+
+.centered {
+    margin: 0 auto;
+}
+
+.container {
+    width: var(--container-width);
+}
+
+.button {
+    background-color: var(--colors-button);
+    color: var(--colors-content);
+    border-radius: var(--button-border-radius);
+    border: none;
+    display: block;
+}
+
+.button:hover {
+    transform: translateY(-1px);
+    background-color: var(--colors-button-hover);
+}

@@ -1,40 +1,44 @@
-import connect from './src/scripts/modules/connect.js';
-import servers from './src/scripts/modules/servers.js';
-import messages from './src/scripts/modules/messages.js';
-import scan from './src/scripts/modules/scan.js';
+import servers from './src/global-modules/literals/servers.js';
+import messages from './src/global-modules/literals/messages.js';
+import { scan } from './src/global-modules/video.js';
+import { connect } from './src/global-modules/server.js';
 
-function injectionPath(fileName) {
-    return `./src/scripts/injections/${fileName}.js`;
-}
 
 function getActiveId() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         chrome.tabs.query({ 
             active: true,
             lastFocusedWindow: true
-        }, tabs => {
-            resolve(tabs[0].id);
-        });
+        }, tabs => resolve(tabs[0].id));
     });
 }
 
-chrome.runtime.onMessage.addListener((request) => {
-    if (request.message === messages.video.locate) {
-        getActiveId().then(tabId => {
+chrome.runtime.onMessage.addListener(async (request) => {
+    let activeTab = await getActiveId();
+
+    switch (request.message) {
+        case messages.video.runScript:
             chrome.scripting.executeScript({
-                target: { tabId: tabId },
+                target: { 
+                    tabId: activeTab 
+                },
                 func: scan,
                 args: [messages.video.status]
             });
-        });
+            break;
 
-    } else if (request.message === messages.server.connect) {
-        getActiveId().then(tabId => {
+        case messages.server.runScript:
             chrome.scripting.executeScript({
-                target: { tabId: tabId },
+                target: { 
+                    tabId: activeTab
+                },
                 func: connect,
-                args: [servers[0], messages.server.status]
+                args: [
+                    servers[Math.floor(Math.random() * servers.length)], 
+                    messages.server.status
+                ]
             });
-        });
+            break;
+
     }
 });

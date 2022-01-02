@@ -1,11 +1,11 @@
 export default {
     video: {
         status: 'vRPriIQaKL',
-        locate: 'ALSRIUcbWS'
+        runScript: 'ALSRIUcbWS'
     },
     server: {
         status: 'sNdpaVKlSR',
-        connect: 'VKJINmRnzJ'
+        runScript: 'VKJINmRnzJ'
     }
 
 }
