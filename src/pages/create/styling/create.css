@@ -2,3 +2,37 @@ body {
     font-size: 15px;
 }
 
+button {
+    height: 43px;;
+    font-size: 15px;
+    width: 100%;
+    background: linear-gradient(to right, #cc9eb8, #c89ad3, #8a7acc, #848de9, #7c83eb);
+}
+
+
+
+
+#room-code-scroll-pane {
+    --scroll-bar-height: 50px;
+
+    overflow-x: scroll;
+    width: 100%;
+    height: var(--scroll-bar-height);
+    line-height: var(--scroll-bar-height); 
+    scrollbar-width: thin;
+    text-align: center;
+
+    box-shadow: 0 0px 2px 0 var(--colors-button);
+
+}
+
+#room-code-scroll-pane label {
+    --padding: 5px;
+
+    padding-left: var(--padding); 
+    padding-right: var(--padding);
+}
+
+#room-code-scroll-pane::-webkit-scrollbar {
+    height: 0px;
+}

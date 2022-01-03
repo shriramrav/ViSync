@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="../../global-styling/global.css">
+        <link rel="stylesheet" href="../../global/styling/global.css">
         <link rel="stylesheet" href="./styling/create.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -9,12 +9,9 @@
     </head>
     <body>
         <div class="centered container">
-            <p><b>Room Code:</b></p>
-            <div id="room-code-scroll-pane" class="shadowed3"><label>yoodafsdfasdfasdfasdfasdfasdasdfasdooo</label></div>
-        </div>
-        <div class="centered container">
-            <p><b>Users:</b></p>
-            <div id="user-list" class="shadowed3">3333</div>
+            <p><b>Room link:</b></p>
+            <div id="room-code-scroll-pane" style="margin-bottom: 8px;"><label id="link-label"></label></div>
+            <button class="button"><b>Disconnect</b></button>
         </div>
     </body>
     <script src="./scripts/create.js" type="module"></script>

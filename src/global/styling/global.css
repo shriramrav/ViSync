@@ -54,9 +54,36 @@ body {
     border-radius: var(--button-border-radius);
     border: none;
     display: block;
+
+    animation: button-leave .2s;
+}
+.button:hover {
+    animation: button-hover .2s forwards;
+    animation-delay: .15s;
 }
 
-.button:hover {
-    transform: translateY(-1px);
-    background-color: var(--colors-button-hover);
+@keyframes button-hover {
+    0% {
+        transform: translateY(0px);
+        filter: brightness(100%);
+    }
+
+    100% {
+        transform: translateY(-1px);
+        filter: brightness(110%);
+        
+    }
+}
+
+@keyframes button-leave {
+    0% {
+        transform: translateY(-1px);
+        filter: brightness(110%);
+    }
+
+    100% {
+        transform: translateY(0px);
+        filter: brightness(100%);
+        
+    }
 }
