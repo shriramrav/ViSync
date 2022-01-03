@@ -1,4 +1,4 @@
-export async function cache(key, value) {
+export function cache(key, value) {
     return new Promise((resolve) => {
         chrome.storage.sync.set({
             [key]: value
@@ -7,7 +7,7 @@ export async function cache(key, value) {
 }
 
 export async function getCache(key) {
-    return new Promise((resolve) => {
+    return (await new Promise((resolve) => {
         chrome.storage.sync.get(key, resolve);
-    });
+    }))[key];
 }

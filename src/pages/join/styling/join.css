@@ -1,0 +1,36 @@
+html {
+    --font-size: 15px;
+}
+
+body {
+    font-size: var(--font-size);
+}
+
+button {
+    font-size: var(--font-size);
+    height: 43px;;
+    width: 100%;
+}
+
+#input {
+    --scroll-bar-height: 50px;
+
+    margin: auto;
+    display: block;
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: var(--font-size);
+    
+
+    /* Visually adjusted */
+    width: 98%;
+
+    background-color: var(--colors-background);
+    color: var(--colors-text);
+
+    height: var(--scroll-bar-height);
+    line-height: var(--scroll-bar-height); 
+    box-shadow: 0 0px 2px 0 var(--colors-button);
+
+}

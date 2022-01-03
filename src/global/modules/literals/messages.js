@@ -5,6 +5,11 @@ export default {
         types: {
             video: 'video',
             iframe: '__video_player_'
+        },
+        events: {
+            play: 'play',
+            pause: 'pause',
+            timeupdate: 'timeupdate'
         }
     },
     server: {
@@ -21,10 +26,16 @@ export default {
             runScript: 'PuHyziODac'
         },
         events: {
+            // Must match registered server events
             connect: 'connect',
             create: 'create',
             join: 'join'
         }
+    },
+    caches: {
+        key: 'pkKWEFkEuL',
+        id: 'bSLudtDQAM',
+        server: 'trQhLHKNwu'
     }
 
 }

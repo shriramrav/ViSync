@@ -1,11 +1,12 @@
 import { bind } from '../../../global/modules/wrapper.js';
 import inject from '../../../global/modules/inject.js';
-import messages from '../../../global/modules/literals/messages.js';
+import m from '../../../global/modules/literals/messages.js';
+import { cache, getCache } from '../../../global/modules/cache.js';
 
 
 /* NOTES:
 
-- fix server so roomkey == user id
+- fix server so roomkey == user id (COMPLETED)
 - finish video sync fn
 - add join page
 - add iframe support
@@ -13,11 +14,14 @@ import messages from '../../../global/modules/literals/messages.js';
 */
 
 async function main() {
-    let connection = JSON.parse(await inject(messages.server.create));
-    let init = await inject(messages.server.init);
+    let obj = JSON.parse(await inject(m.server.create));
+    
+    await cache(m.caches.key, obj.key);
+    await inject(m.server.init);
 
+    // console.log(await getCache(m.cache.key));
 
-    _('#link-label').html(connection.key);
+    _('#link-label').html(await getCache(m.caches.key));
 }
 
 
