@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
                     errorMessage: m.server.connect.errorMessage
                 } 
             ]);
-            
+
             break;
         case m.server.registerUser.runScript: 
             await inject(tab, server.registerUser, [
@@ -58,13 +58,13 @@ chrome.runtime.onMessage.addListener(async (request) => {
                 }
             ]);
             break;
-        // case m.server.init.runScript:
-        //     await inject(tab, server.init, [{
-        //         key: await getCache(m.caches.key),
-        //         message: m.server.init.status,
-        //         events: m.video.events,
-        //     }]);
-        //     break;
+        case m.server.init.runScript:
+            await inject(tab, server.init, [{
+                key: await getCache(m.caches.key),
+                message: m.server.init.status,
+                events: m.video.events,
+            }]);
+            break;
     }
 });
 

@@ -18,6 +18,7 @@ async function main() {
     await cache(m.caches.key, key.random());
     
     let obj = JSON.parse(await inject(m.server.registerUser));
+    await inject(m.server.init);
 
     console.log(obj);
 

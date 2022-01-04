@@ -1,6 +1,6 @@
 import m from '../../../global/modules/literals/messages.js';
 import { cd } from '../../../global/modules/paths.js';
-// import { cache } from '../../../global/modules/cache.js';
+import { cache } from '../../../global/modules/cache.js';
 import inject from '../../../global/modules/inject.js';
 import { bind } from '../../../global/modules/wrapper.js';
 
