@@ -16,7 +16,7 @@ export default {
         connect: {
             status: 'sNdpaVKlSR',
             runScript: 'VKJINmRnzJ',
-            errorMessage: 'ySfniJoDxo'
+            errorMessage: 'error'
         },
         registerUser: {
             status: 'tIVSkVefJp',

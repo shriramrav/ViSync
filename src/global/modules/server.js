@@ -11,7 +11,10 @@ export function connect(message, args) {
 
     ws.onopen = sendMessage;
     ws.onmessage = event => event.data.text().then(sendMessage); // .text() used to parse Blob
-    ws.onerror = () => sendMessage(args.errorMessage);
+    ws.onerror = () => {
+        console.log('error listener ran');
+        sendMessage(args.errorMessage);
+    };
     
     //Helper functions
     ws.sts = (obj) => ws.send(JSON.stringify(obj)); // Serializes then sends
@@ -28,14 +31,16 @@ export function init(args) {
     window.prevTimeStamp = _('video').currentTime;
 
     window.runSocketEvent = (event, data = '', key = args.key) => {
-        window.__ws.send(JSON.stringify({
+        ws.send(JSON.stringify({
             key: key,
             event: event,
             data: data
         }));
     };
 
-    window.__ws.onmessage = (event) => {
+    ws.onmessage = (event) => {
+        console.log(event);
+
         event.data.text().then(result => {
             let obj = JSON.parse(result);
             window[`__on${obj.event}`](obj.data);
