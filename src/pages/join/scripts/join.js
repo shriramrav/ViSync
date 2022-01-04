@@ -5,15 +5,20 @@ import inject from '../../../global/modules/inject.js';
 
 
 function rejectErrors(roomCode) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             let codes = roomCode.split('-'); 
             let msc = m.server.connect;
-            
+
             await cache(m.caches.key, codes[0]);
             await cache(m.caches.server, codes[1]);
             
-            (await inject(msc)).data === msc.errorMessage ? reject() : resolve();
+            if (await inject(msc) === msc.errorMessage) {
+                throw '';
+            }
+
+            resolve();
+
         } catch (err) {
             reject();
         }
@@ -21,16 +26,17 @@ function rejectErrors(roomCode) {
 }
 
 
-async function listener() {
+function listener() {
     _('#join-btn').disabled = true;
 
-    rejectErrors(_('#input').val()).then(() => {
+    rejectErrors(_('#input').val()).then(async () => {
         console.log('connection successful');
+        await inject(m.server.registerUser);
+        await inject(m.server.init);
 
     }).catch(() => {
-
+        console.log('error caught');
     });
-
 
 }
 

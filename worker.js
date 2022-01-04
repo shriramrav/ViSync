@@ -67,20 +67,3 @@ chrome.runtime.onMessage.addListener(async (request) => {
             break;
     }
 });
-
-
-        // case m.server.create.runScript: 
-        //     await inject(tab, server.create, [{
-        //         key: await getCache(m.caches.id),
-        //         message: m.server.create.status,
-        //         event: m.server.events.create
-        //     }]);
-        //     break;
-        // case m.server.join.runScript: 
-        //     await inject(tab, server.init, [{
-        //         key: await getCache(m.caches.key),
-        //         message: m.server.join.status,
-        //         event: m.server.events.join,
-        //         id: key.random()
-        //     }]);
-        //     break;
