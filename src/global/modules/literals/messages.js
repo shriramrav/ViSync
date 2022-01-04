@@ -15,9 +15,10 @@ export default {
     server: {
         connect: {
             status: 'sNdpaVKlSR',
-            runScript: 'VKJINmRnzJ'
+            runScript: 'VKJINmRnzJ',
+            errorMessage: 'ySfniJoDxo'
         },
-        create: {
+        registerUser: {
             status: 'tIVSkVefJp',
             runScript: 'XXBBqabYOL'
         },
@@ -28,10 +29,13 @@ export default {
         events: {
             // Must match registered server events
             connect: 'connect',
-            create: 'create',
-            join: 'join'
+            registerUser: 'registerUser'
         }
     },
+    servers: [
+        'quRIWPDEVs',
+        'hjwsjupvd0'
+    ],
     caches: {
         key: 'pkKWEFkEuL',
         id: 'bSLudtDQAM',

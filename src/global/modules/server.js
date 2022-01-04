@@ -1,51 +1,28 @@
-export function connect(args) {
-    console.log('connection started');
+export function connect(message, args) {
+    window.ws = new WebSocket(`wss://${args.server}.glitch.me/`);
+    ws.chromeMessage = message;
 
-    let ws = new WebSocket(`wss://${args.server}.glitch.me/`);
-    ws.onopen = () => {
-        console.log('connection success');
-        
-        ws.onmessage = (event) => {
-            event.data.text().then(result => {
-                console.log(result);
-                chrome.runtime.sendMessage({ 
-                    message: args.message,
-                    data: result
-                });
-            });
-        }
-
-        ws.send(JSON.stringify({
-            key: '',
-            event: args.event,
-            data: {
-                server: args.server,
-                id: args.id
-            }
-        }));
-
-        window.__ws = ws;
-    };
-
-}
-
-export function create(args) {
-    window.__ws.onmessage = (event) => {
-        event.data.text().then(result => { // .text() used to parse Blob
-            chrome.runtime.sendMessage({ 
-                message: args.message,
-                data: result
-            });
+    function sendMessage(data = '', _message = ws.chromeMessage) {
+        chrome.runtime.sendMessage({ 
+            message: _message,
+            data: data
         });
     }
 
-    // Note: data is not used
-    window.__ws.send(JSON.stringify({
-        key: args.key,
-        event: args.event,
-        data: '' 
-    }));
+    ws.onopen = sendMessage;
+    ws.onmessage = event => event.data.text().then(sendMessage); // .text() used to parse Blob
+    ws.onerror = () => sendMessage(args.errorMessage);
+    
+    //Helper functions
+    ws.sts = (obj) => ws.send(JSON.stringify(obj)); // Serializes then sends
+    ws.sendMessage = sendMessage; // Binds messenger for future use
 }
+
+export function registerUser(message, args) {
+    ws.chromeMessage = message;
+    ws.sts(args);
+}
+
 
 export function init(args) {
     window.prevTimeStamp = _('video').currentTime;

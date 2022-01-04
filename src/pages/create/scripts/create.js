@@ -2,6 +2,7 @@ import { bind } from '../../../global/modules/wrapper.js';
 import inject from '../../../global/modules/inject.js';
 import m from '../../../global/modules/literals/messages.js';
 import { cache, getCache } from '../../../global/modules/cache.js';
+import * as key from '../../../global/modules/key.js';
 
 
 /* NOTES:
@@ -14,14 +15,13 @@ import { cache, getCache } from '../../../global/modules/cache.js';
 */
 
 async function main() {
-    let obj = JSON.parse(await inject(m.server.create));
+    await cache(m.caches.key, key.random());
     
-    await cache(m.caches.key, obj.key);
-    await inject(m.server.init);
+    let obj = JSON.parse(await inject(m.server.registerUser));
 
-    // console.log(await getCache(m.cache.key));
+    console.log(obj);
 
-    _('#link-label').html(await getCache(m.caches.key));
+    _('#link-label').html(`${await getCache(m.caches.key)}-${await getCache(m.caches.server)}`);
 }
 
 

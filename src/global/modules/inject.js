@@ -1,3 +1,4 @@
+// Injection from popup
 export default function(message) {
     return new Promise((resolve) => {
         chrome.runtime.sendMessage({
@@ -14,4 +15,18 @@ export default function(message) {
         chrome.runtime.onMessage.addListener(eventListener);
     });
 
+}
+
+// Service worker injection 
+// Note: args should maintain [message, obj] form
+export function inject(tab, func, args = []) {
+    return new Promise(
+        resolve => chrome.scripting.executeScript({
+            target: { 
+                tabId: tab 
+            },
+            func: func,
+            args: args
+        }, resolve)
+    );
 }

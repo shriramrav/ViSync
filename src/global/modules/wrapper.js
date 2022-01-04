@@ -7,9 +7,7 @@ export function bind(loaded = true) {
             // Helper functions
             element.on = (event, fn) => element.addEventListener(event, fn);
             element.html = (html) => element.innerHTML = html;
-            element.val = () => {
-                return element.value;
-            };
+            element.val = () => element.value;
             element.addClasses = (classes) => classes.forEach(_class => element.classList.add(_class));
             element.removeClasses= (classes) => classes.forEach(_class => element.classList.remove(_class));
         
