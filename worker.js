@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
                 m.server.connect.status,
                 {
                     server: await getCache(m.caches.server),
-                    errorMessage: m.server.connect.errorMessage
+                    errorMessage: m.server.events.errorMessage
                 } 
             ]);
 
@@ -40,6 +40,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
             await inject(tab, server.registerUser, [
                 m.server.registerUser.status,
                 {
+                    // If error, server sets data property to error message
                     key: await getCache(m.caches.key),
                     event: m.server.events.registerUser,
                     id: await getCache(m.caches.id),
@@ -53,6 +54,9 @@ chrome.runtime.onMessage.addListener(async (request) => {
                 message: m.server.init.status,
                 events: m.video.events,
             }]);
+            break;
+        case m.server.destroy.runScript: 
+            await inject(tab, server.destroy, [ m.server.destroy.status ]);
             break;
     }
 });

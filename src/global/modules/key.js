@@ -84,7 +84,7 @@ export function random(length = 10) {
             Object.get(
                 Array.rand(
                     Object.keys(chars)
-                    // Server object keys can't start with number
+                    // Server room object keys can't start with number
                     .filter(name => i != 0 || name !== 'numbers')
                 ),
                 chars

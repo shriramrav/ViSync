@@ -16,6 +16,7 @@ export function connect(message, args) {
     ws.onmessage = event => {
         console.log('onmessage event listenr');
         console.log(event);
+        console.log(event.data);
 
         event.data.text().then(sendMessage);
         // console.log(event.data);
@@ -24,7 +25,10 @@ export function connect(message, args) {
     ws.onerror = () => sendMessage(args.errorMessage);
 
     //Helper functions
-    ws.sts = (obj) => ws.send(JSON.stringify(obj)); // Serializes then sends
+    ws.sts = obj => ws.send(JSON.stringify(obj)); // Serializes then sends
+    ws.deserialize = event => new Promise(
+        resolve => event.data.text().then(resolve(JSON.parse(result)))
+    );
     ws.sendMessage = sendMessage; // Binds messenger for future use
 }
 
@@ -34,67 +38,49 @@ export function registerUser(message, args) {
 }
 
 
+// Name should be changed
 export function init(args) {
-    window.prevTimeStamp = _('video').currentTime;
-
-    window.runSocketEvent = (event, data = '', key = args.key) => {
-        ws.send(JSON.stringify({
-            key: key,
-            event: event,
-            data: data
-        }));
+    // Video sync functionality attached to socket so it can be easily removed if needed
+    ws.player = {
+        // Add used vars here later
     };
+    ws.chromeMessage = args.message;
+    ws.player.prevTimeStamp = _('video').currentTime;
+    
 
-    ws.onmessage = (event) => {
-        event.data.text().then(result => {
-            let obj = JSON.parse(result);
-            window[`__on${obj.event}`](obj.data);
-        });
-    }
+    ws.player.sendEvent = (event, data = '', key = args.key) => ws.sts({
+        key: key,
+        event: event,
+        data: data
+    });
 
-    window.__eventVars = {
-        playState: false,
-        timeUpdated: false
-    }
-
-    window.__onpause = function() {
-
+    ws.player.pause = () => {
         _('video').pause();
         console.log('paused');
-
     }
 
-    window.__onplay = function() {
+    ws.player.play = () => {
         _('video').play();
         console.log('played');
     }
 
-    window.__ontimeupdate = function(timeStamp) {
-        window.__eventVars.timeUpdated = true;
+    ws.player.updateTime = timeStamp => {
         _('video').currentTime = timeStamp;
         console.log(`changed time to : ${timeStamp}`);
-
-        setTimeout(() => window.__eventVars.timeUpdated = false, 60);
     }
 
+    // Listeners
+    ws.player.pauseListener = () => {
+        console.log('pause');
+        ws.player.sendEvent(args.events.pause);
+    }
 
-    _('video').on('pause', e => {
-        if (!window.__eventVars.timeUpdated) {
-            console.log('pause');
+    ws.player.playListener = () => {
+        console.log('playing');
+        ws.player.sendEvent(args.events.play);
+    }
 
-            window.runSocketEvent(args.events.pause);
-        }
-    });
-
-    _('video').on('play', () => {
-        if (!window.__eventVars.timeUpdated) {
-            console.log('playing');
-            window.runSocketEvent(args.events.play);
-        }
-    });
-
-
-    _('video').on('timeupdate', () => {
+    ws.player.timeUpdateListener = () => {
         const manualAdjGap = .5;
 
         if (Math.abs(_('video').currentTime - window.prevTimeStamp) > manualAdjGap) {
@@ -103,28 +89,36 @@ export function init(args) {
 
 
             // CAUTION: CONDITION UNTESTED
-            if (window.__eventVars.timeUpdated = true) {
-                window.runSocketEvent(args.events.timeupdate, _('video').currentTime);
-            }
+            ws.player.sendEvent(args.events.timeupdate, _('video').currentTime);
         }
 
-        window.prevTimeStamp = _('video').currentTime;
-    });
+        ws.player.prevTimeStamp = _('video').currentTime;
+    }
 
+    // Add listeners to video player
+    _('video').on('pause', ws.player.pauseListener);
+    _('video').on('play', ws.player.playListener);
+    _('video').on('timeupdate', ws.player.timeUpdateListener);
 
-    chrome.runtime.sendMessage({ 
-        message: args.message,
-        data: 'afsddfsdasdffasdsfadsdf'
-    });
+    ws.onmessage = (event) => {
+        event.data.text().then(result => {
+            let obj = JSON.parse(result);
+            ws.player[`${obj.event}`](obj.data);
+        });
+    }
+
+    ws.sendMessage();
 }
 
-export function destroy() {
-    ws.close();
-
-    // bind listeners to ws object so they can be removed later
-
-    // _('video').removeEventListener(x...y...z);
-
-    
-    ws = null;
+export function destroy(message) {
+    try {
+        _('video').off('pause', ws.player.pauseListener);
+        _('video').off('play', ws.player.playListener);
+        _('video').off('timeupdate', ws.player.timeUpdateListener);
+    } finally {
+        ws.chromeMessage = message;
+        ws.sendMessage();
+        ws.close();
+        ws = null;
+    }
 }

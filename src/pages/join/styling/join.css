@@ -10,6 +10,7 @@ button {
     font-size: var(--font-size);
     height: 43px;
     width: 100%;
+    transition: background-color .15s ease;
 }
 
 #input {
@@ -35,4 +36,9 @@ button {
 
     margin-bottom: 12px;
 
+}
+
+.error {
+    transition: background-color .1s ease;
+    background-color: rgb(212, 85, 85);
 }

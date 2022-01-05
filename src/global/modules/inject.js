@@ -6,6 +6,7 @@ export default function(message) {
         });
 
         const eventListener = (event) => {
+            console.log('injection rannn');
             if (event.message === message.status) {
                 chrome.runtime.onMessage.removeListener(eventListener);
                 resolve(event.data);

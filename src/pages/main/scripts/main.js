@@ -1,38 +1,30 @@
 import m from '../../../global/modules/literals/messages.js';
 import { cd } from '../../../global/modules/paths.js';
-import { cache } from '../../../global/modules/cache.js';
+import { cache, getCache } from '../../../global/modules/cache.js';
 import inject from '../../../global/modules/inject.js';
 import { bind } from '../../../global/modules/wrapper.js';
-
-function startAnim() {
-    const message = 'Loading...';
-
-    _('#create-btn').html(`<b>${message
-        .split('')
-        .map(char => `<span>${char}</span>`)
-        .join('')
-    }</b>`);
-
-    _('#create-btn').addClasses(['anim']);
-}
+import { loadingAnim } from '../../../global/modules/animations.js';
 
 // Listener for create button
 async function createListener() {
-    startAnim();
+    loadingAnim('#create-btn');
 
     _('#create-btn').disabled = true;
     _('#join-btn').disabled = true;
 
-    if (await inject(m.video)) {
-        await cache(m.caches.server, m.servers[0]);
+    console.log(`server: ${m.servers[0]}`);
+    await cache(m.caches.server, m.servers[0]);
 
-        let obj = await inject(m.server.connect);
+    console.log(`cached server : ${await getCache(m.caches.server)}`);
 
-        console.log(obj);
+    console.log('video success');
+    let obj = await inject(m.server.connect);
 
-        if (obj.data !== m.server.connect.errorMessage) {
-            window.location.href = cd(window.location.href, '../../create/create.html');
-        }
+    console.log('obj:');
+    console.log(obj);
+
+    if (obj.data !== m.server.events.errorMessage) {
+        window.location.href = cd(window.location.href, '../../create/create.html');
     }
 }
 
@@ -46,4 +38,4 @@ function main() {
 }
 
 
-bind(false).then(main);
+bind(false, main);

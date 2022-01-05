@@ -6,8 +6,10 @@ export function cache(key, value) {
     });
 }
 
-export async function getCache(key) {
-    return (await new Promise((resolve) => {
-        chrome.storage.sync.get(key, resolve);
-    }))[key];
+export function getCache(key) {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(key, 
+            result => resolve(result[key])
+        );
+    });
 }

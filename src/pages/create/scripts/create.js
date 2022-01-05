@@ -5,14 +5,14 @@ import { cache, getCache } from '../../../global/modules/cache.js';
 import * as key from '../../../global/modules/key.js';
 
 
-/* NOTES:
+async function listener() {
+    console.log('listener ran');
 
-- fix server so roomkey == user id (COMPLETED)
-- finish video sync fn
-- add join page
-- add iframe support
+    // await inject(m.server.destroy);
 
-*/
+    console.log('now will close');
+    window.close();
+}
 
 async function main() {
 
@@ -21,14 +21,18 @@ async function main() {
     await cache(m.caches.key, _key);
     await cache(m.caches.id, _key);
 
+    console.log('before');
     let obj = JSON.parse(await inject(m.server.registerUser));
     
-    await inject(m.server.init);
+    console.log(obj);
+
+    // await inject(m.server.init);
 
     console.log(obj);
 
     _('#link-label').html(`${await getCache(m.caches.key)}`);
+    _('#btn').on('click', listener);
 }
 
 
-bind(false).then(main);
+bind(false, main);

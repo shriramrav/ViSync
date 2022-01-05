@@ -2,21 +2,16 @@ export default {
     video: {
         status: 'vRPriIQaKL',
         runScript: 'ALSRIUcbWS',
-        // types: {
-        //     video: 'video',
-        //     iframe: '__video_player_'
-        // },
         events: {
             play: 'play',
             pause: 'pause',
-            timeupdate: 'timeupdate'
+            timeUpdate: 'updateTime'
         }
     },
     server: {
         connect: {
             status: 'sNdpaVKlSR',
             runScript: 'VKJINmRnzJ',
-            errorMessage: 'error'
         },
         registerUser: {
             status: 'tIVSkVefJp',
@@ -26,10 +21,15 @@ export default {
             status: 'aflZjFaurJ',
             runScript: 'PuHyziODac'
         },
+        destroy: {
+            status: 'rKJCNCTLqK',
+            runScript: 'kewmYRJhAn'
+        },
         events: {
             // Must match registered server events
             connect: 'connect',
-            registerUser: 'registerUser'
+            registerUser: 'registerUser',
+            errorMessage: 'error'
         }
     },
     servers: [
