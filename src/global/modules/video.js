@@ -1,18 +1,7 @@
-export function scan(message, types) { 
-    let type = '';
-
-    if (_(types.video) != null) {
-        type = types.video;
-    } else if (_(`#${types.iframe}`) != null) {
-        type = types.iframe;
-    }
-
+export function scan(message) { 
     chrome.runtime.sendMessage({
         message: message,
-        data: {
-            result: type !== '',
-            type: type
-        }
+        data: _('video') != null
     });
 }
 

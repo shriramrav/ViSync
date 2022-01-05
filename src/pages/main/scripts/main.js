@@ -23,9 +23,14 @@ async function createListener() {
     _('#create-btn').disabled = true;
     _('#join-btn').disabled = true;
 
-    if ((await inject(m.video)).result) {
+    if (await inject(m.video)) {
         await cache(m.caches.server, m.servers[0]);
-        if ((await inject(m.server.connect)).data !== m.server.connect.errorMessage) {
+
+        let obj = await inject(m.server.connect);
+
+        console.log(obj);
+
+        if (obj.data !== m.server.connect.errorMessage) {
             window.location.href = cd(window.location.href, '../../create/create.html');
         }
     }

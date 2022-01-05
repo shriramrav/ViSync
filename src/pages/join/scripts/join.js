@@ -2,16 +2,28 @@ import { bind } from '../../../global/modules/wrapper.js';
 import { cache } from '../../../global/modules/cache.js';
 import m from '../../../global/modules/literals/messages.js';
 import inject from '../../../global/modules/inject.js';
+import * as key from '../../../global/modules/key.js';
 
 
-function rejectErrors(roomCode) {
+/* NOTES::
+ - Add seperate error message for registerUser
+ - Finish up init
+ - Fix infinite loop glitch on video player
+ - Add error animation for join
+ - Finish disconnect buttons
+*/
+
+
+function rejectErrors(code) {
     return new Promise(async (resolve, reject) => {
         try {
-            let codes = roomCode.split('-'); 
             let msc = m.server.connect;
 
-            await cache(m.caches.key, codes[0]);
-            await cache(m.caches.server, codes[1]);
+            await cache(m.caches.key, code);
+            await cache(m.caches.id, key.random());
+            
+            // Only one server enabled, can change later
+            await cache(m.caches.server, m.servers[0]);
             
             if (await inject(msc) === msc.errorMessage) {
                 throw '';
@@ -27,21 +39,32 @@ function rejectErrors(roomCode) {
 
 
 function listener() {
-    _('#join-btn').disabled = true;
+    _('button').disabled = true;
+
+    // REMOVE LATER
+    _('#input').disabled = true;
 
     rejectErrors(_('#input').val()).then(async () => {
         console.log('connection successful');
-        await inject(m.server.registerUser);
-        await inject(m.server.init);
+        let regResult = JSON.parse(await inject(m.server.registerUser));
+        
+        if (regResult.data === m.server.connect.errorMessage) {
+            return Promise.reject();
+        }
 
-    }).catch(() => {
+        // await inject(m.server.init);
+        // set Disconnect button
+    })
+    .catch(() => {
         console.log('error caught');
+
+        // Run error animation here
     });
 
 }
 
 function main() {
-    _('#join-btn').on('click', listener);
+    _('button').on('click', listener);
 }
 
 

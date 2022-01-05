@@ -54,9 +54,28 @@ body {
     border-radius: var(--button-border-radius);
     border: none;
     display: block;
-
     animation: button-leave .2s;
+    margin-bottom: 10px;
 }
+
+.button:last-of-type {
+    margin-bottom: 16px;
+}
+
+@keyframes button-leave {
+    0% {
+        transform: translateY(-1px);
+        filter: brightness(110%);
+    }
+
+    100% {
+        transform: translateY(0px);
+        filter: brightness(100%);
+        
+    }
+}
+
+
 .button:hover {
     animation: button-hover .2s forwards;
     animation-delay: .15s;
@@ -71,19 +90,6 @@ body {
     100% {
         transform: translateY(-1px);
         filter: brightness(110%);
-        
-    }
-}
-
-@keyframes button-leave {
-    0% {
-        transform: translateY(-1px);
-        filter: brightness(110%);
-    }
-
-    100% {
-        transform: translateY(0px);
-        filter: brightness(100%);
         
     }
 }

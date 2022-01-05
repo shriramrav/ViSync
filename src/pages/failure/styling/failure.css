@@ -1,0 +1,13 @@
+html {
+    --font-size: 15px;
+}
+
+body {
+    font-size: var(--font-size);
+}
+
+button {
+    font-size: var(--font-size);
+    height: 43px;
+    width: 100%;
+}

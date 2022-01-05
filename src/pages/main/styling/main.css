@@ -14,7 +14,6 @@ button {
     animation: background-gradient 5s ease infinite;
 }
 
-
 @keyframes background-gradient {
     0% {
         background-position: 0% 0%;

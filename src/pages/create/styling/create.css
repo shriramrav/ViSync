@@ -11,7 +11,7 @@ button {
 
 
 #room-code-scroll-pane {
-    --scroll-bar-height: 50px;
+    --scroll-bar-height: 46px;
 
     overflow-x: scroll;
     width: 100%;

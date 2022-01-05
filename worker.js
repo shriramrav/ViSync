@@ -2,17 +2,9 @@ import m from './src/global/modules/literals/messages.js';
 import { scan } from './src/global/modules/video.js';
 import * as server from './src/global/modules/server.js';
 import * as key from './src/global/modules/key.js';
-import { cache, getCache } from './src/global/modules/cache.js';
+import { getCache } from './src/global/modules/cache.js';
 import { bind } from './src/global/modules/wrapper.js';
 import { inject } from './src/global/modules/inject.js';
-
-
-
-/* NOTES:
- - Change args.id -> args.key
- - Combine create & join event to register event
-*/
-
 
 function getActiveId() {
     return new Promise((resolve) => {
@@ -27,14 +19,11 @@ chrome.runtime.onMessage.addListener(async (request) => {
     let tab = await getActiveId();
 
     // Loads injection dependencies
-    [bind].forEach(async func => await inject(tab, func));
+    [ bind ].forEach(async func => await inject(tab, func));
 
     switch (request.message) {
         case m.video.runScript:
-            await inject(tab, scan, [
-                m.video.status, 
-                m.video.types
-            ]);
+            await inject(tab, scan, [ m.video.status ]);
             break;
 
         case m.server.connect.runScript:
@@ -53,7 +42,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
                 {
                     key: await getCache(m.caches.key),
                     event: m.server.events.registerUser,
-                    id: key.random(),
+                    id: await getCache(m.caches.id),
                     data: ''
                 }
             ]);

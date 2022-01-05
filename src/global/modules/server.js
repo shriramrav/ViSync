@@ -3,6 +3,9 @@ export function connect(message, args) {
     ws.chromeMessage = message;
 
     function sendMessage(data = '', _message = ws.chromeMessage) {
+
+        console.log('message has been recieved');
+
         chrome.runtime.sendMessage({ 
             message: _message,
             data: data
@@ -10,7 +13,14 @@ export function connect(message, args) {
     }
 
     ws.onopen = sendMessage;
-    ws.onmessage = event => event.data.text().then(sendMessage); // .text() used to parse Blob
+    ws.onmessage = event => {
+        console.log('onmessage event listenr');
+        console.log(event);
+
+        event.data.text().then(sendMessage);
+        // console.log(event.data);
+        // event.data.text().then(sendMessage)
+    }; // .text() used to parse Blob
     ws.onerror = () => sendMessage(args.errorMessage);
 
     //Helper functions
@@ -106,4 +116,15 @@ export function init(args) {
         message: args.message,
         data: 'afsddfsdasdffasdsfadsdf'
     });
+}
+
+export function destroy() {
+    ws.close();
+
+    // bind listeners to ws object so they can be removed later
+
+    // _('video').removeEventListener(x...y...z);
+
+    
+    ws = null;
 }

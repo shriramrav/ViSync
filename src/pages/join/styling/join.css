@@ -13,7 +13,7 @@ button {
 }
 
 #input {
-    --scroll-bar-height: 50px;
+    --input-box-height: 45px;
 
     margin: auto;
     display: block;
@@ -21,7 +21,7 @@ button {
     text-align: center;
     outline: none;
     font-size: var(--font-size);
-    
+    font-family: var(--fonts-global);    
 
     /* Visually adjusted */
     width: 98%;
@@ -29,8 +29,10 @@ button {
     background-color: var(--colors-background);
     color: var(--colors-text);
 
-    height: var(--scroll-bar-height);
-    line-height: var(--scroll-bar-height); 
+    height: var(--input-box-height);
+    line-height: var(--input-box-height); 
     box-shadow: 0 0px 2px 0 var(--colors-button);
+
+    margin-bottom: 12px;
 
 }

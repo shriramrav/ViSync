@@ -15,14 +15,19 @@ import * as key from '../../../global/modules/key.js';
 */
 
 async function main() {
-    await cache(m.caches.key, key.random());
-    
+
+    let _key = key.random();
+
+    await cache(m.caches.key, _key);
+    await cache(m.caches.id, _key);
+
     let obj = JSON.parse(await inject(m.server.registerUser));
+    
     await inject(m.server.init);
 
     console.log(obj);
 
-    _('#link-label').html(`${await getCache(m.caches.key)}-${await getCache(m.caches.server)}`);
+    _('#link-label').html(`${await getCache(m.caches.key)}`);
 }
 
 

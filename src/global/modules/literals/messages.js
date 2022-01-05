@@ -2,10 +2,10 @@ export default {
     video: {
         status: 'vRPriIQaKL',
         runScript: 'ALSRIUcbWS',
-        types: {
-            video: 'video',
-            iframe: '__video_player_'
-        },
+        // types: {
+        //     video: 'video',
+        //     iframe: '__video_player_'
+        // },
         events: {
             play: 'play',
             pause: 'pause',
