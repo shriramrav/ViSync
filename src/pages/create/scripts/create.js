@@ -5,12 +5,8 @@ import { cache, getCache } from '../../../global/modules/cache.js';
 import * as key from '../../../global/modules/key.js';
 
 
-async function listener() {
-    console.log('listener ran');
-
-    // await inject(m.server.destroy);
-
-    console.log('now will close');
+async function destroy() {
+    await inject(m.server.destroy);
     window.close();
 }
 
@@ -21,17 +17,11 @@ async function main() {
     await cache(m.caches.key, _key);
     await cache(m.caches.id, _key);
 
-    console.log('before');
-    let obj = JSON.parse(await inject(m.server.registerUser));
-    
-    console.log(obj);
-
-    // await inject(m.server.init);
-
-    console.log(obj);
+    await inject(m.server.registerUser);
+    await inject(m.server.init);
 
     _('#link-label').html(`${await getCache(m.caches.key)}`);
-    _('#btn').on('click', listener);
+    _('button').on('click', destroy);
 }
 
 

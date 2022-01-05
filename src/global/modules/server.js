@@ -3,9 +3,6 @@ export function connect(message, args) {
     ws.chromeMessage = message;
 
     function sendMessage(data = '', _message = ws.chromeMessage) {
-
-        console.log('message has been recieved');
-
         chrome.runtime.sendMessage({ 
             message: _message,
             data: data
@@ -13,15 +10,7 @@ export function connect(message, args) {
     }
 
     ws.onopen = sendMessage;
-    ws.onmessage = event => {
-        console.log('onmessage event listenr');
-        console.log(event);
-        console.log(event.data);
-
-        event.data.text().then(sendMessage);
-        // console.log(event.data);
-        // event.data.text().then(sendMessage)
-    }; // .text() used to parse Blob
+    ws.onmessage = event => event.data.text().then(sendMessage);
     ws.onerror = () => sendMessage(args.errorMessage);
 
     //Helper functions
@@ -46,6 +35,7 @@ export function init(args) {
     };
     ws.chromeMessage = args.message;
     ws.player.prevTimeStamp = _('video').currentTime;
+    ws.player.currentTime = Date.now();
     
 
     ws.player.sendEvent = (event, data = '', key = args.key) => ws.sts({
@@ -65,6 +55,8 @@ export function init(args) {
     }
 
     ws.player.updateTime = timeStamp => {
+        // Need to test (attempting to prevent data being sent back)
+        ws.player.prevTimeStamp = timeStamp;
         _('video').currentTime = timeStamp;
         console.log(`changed time to : ${timeStamp}`);
     }
@@ -81,15 +73,11 @@ export function init(args) {
     }
 
     ws.player.timeUpdateListener = () => {
-        const manualAdjGap = .5;
+        const minManualAdjGap = .5;
 
-        if (Math.abs(_('video').currentTime - window.prevTimeStamp) > manualAdjGap) {
-            // let timeStamp = _('video').currentTime;
-            // window.prevTimeStamp = _('video').currentTime;
-
-
-            // CAUTION: CONDITION UNTESTED
-            ws.player.sendEvent(args.events.timeupdate, _('video').currentTime);
+        if (Math.abs(_('video').currentTime - ws.player.prevTimeStamp) > minManualAdjGap) {
+            console.log('time gap exists');
+            ws.player.sendEvent(args.events.timeUpdate, _('video').currentTime);
         }
 
         ws.player.prevTimeStamp = _('video').currentTime;
@@ -101,10 +89,18 @@ export function init(args) {
     _('video').on('timeupdate', ws.player.timeUpdateListener);
 
     ws.onmessage = (event) => {
-        event.data.text().then(result => {
-            let obj = JSON.parse(result);
-            ws.player[`${obj.event}`](obj.data);
-        });
+        const limiter = 150;
+
+        if (Date.now() - ws.player.currentTime > limiter) {
+            event.data.text().then(result => {
+                let obj = JSON.parse(result);
+                console.log(obj.data);
+                console.log(obj);
+                ws.player[`${obj.event}`](obj.data);
+            });
+        }
+
+        ws.player.currentTime = Date.now();
     }
 
     ws.sendMessage();

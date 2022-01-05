@@ -44,9 +44,8 @@ function rejectErrors(code) {
 
 function listener() {
     loadingAnim('button');
-    
+
     rejectErrors(_('#input').val()).then(async () => {
-        console.log('connection successful');
         let regResult = JSON.parse(await inject(m.server.registerUser));
         
         if (regResult.data === m.server.events.errorMessage) {

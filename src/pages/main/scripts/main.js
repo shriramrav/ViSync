@@ -12,18 +12,9 @@ async function createListener() {
     _('#create-btn').disabled = true;
     _('#join-btn').disabled = true;
 
-    console.log(`server: ${m.servers[0]}`);
     await cache(m.caches.server, m.servers[0]);
-
-    console.log(`cached server : ${await getCache(m.caches.server)}`);
-
-    console.log('video success');
-    let obj = await inject(m.server.connect);
-
-    console.log('obj:');
-    console.log(obj);
-
-    if (obj.data !== m.server.events.errorMessage) {
+    
+    if ((await inject(m.server.connect)).data !== m.server.events.errorMessage) {
         window.location.href = cd(window.location.href, '../../create/create.html');
     }
 }

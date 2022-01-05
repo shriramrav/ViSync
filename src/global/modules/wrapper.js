@@ -16,11 +16,10 @@ export async function bind(windowLoaded = true, callback = () => {}) {
             element.addClasses = classes => classes.forEach(_class => element.classList.add(_class));
             element.removeClasses= classes => classes.forEach(_class => element.classList.remove(_class));
         
-        } catch (err) {
-            console.log(err);
+        } finally {
+            return element;
         }
         
-        return element;
     }
 
     if (!windowLoaded) {
@@ -28,13 +27,6 @@ export async function bind(windowLoaded = true, callback = () => {}) {
         await new Promise((resolve) => window.onload = resolve);
     }
 
-    console.log('wrapper function:');
-    console.log(_);
     window._ = _;
-
-    console.log('callback:');
-
-    console.log(callback);
-
     callback();
 }
