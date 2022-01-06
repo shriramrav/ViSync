@@ -18,7 +18,7 @@ async function main() {
     await cache(m.caches.id, _key);
 
     await inject(m.server.registerUser);
-    await inject(m.server.init);
+    await inject(m.server.sync);
 
     _('#link-label').html(`${await getCache(m.caches.key)}`);
     _('button').on('click', destroy);

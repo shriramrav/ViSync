@@ -27,56 +27,39 @@ export function registerUser(message, args) {
 }
 
 
-// Name should be changed
-export function init(args) {
+export function sync(args) {
+    ws.chromeMessage = args.message;
     // Video sync functionality attached to socket so it can be easily removed if needed
     ws.player = {
-        // Add used vars here later
+        prevTimeStamp: _('video').currentTime,
+        currentTime: Date.now(),
+        consecutiveEventCount: 0,
+        minManualAdjGap: 0.5
     };
-    ws.chromeMessage = args.message;
-    ws.player.prevTimeStamp = _('video').currentTime;
-    ws.player.currentTime = Date.now();
-    
 
-    ws.player.sendEvent = (event, data = '', key = args.key) => ws.sts({
+    ws.player.sendEvent = (event, data = '', key = args.key, id = args.id) => ws.sts({
         key: key,
         event: event,
-        data: data
+        data: data,
+        id: id
     });
 
-    ws.player.pause = () => {
-        _('video').pause();
-        console.log('paused');
-    }
+    ws.player.pause = () => _('video').pause();
 
-    ws.player.play = () => {
-        _('video').play();
-        console.log('played');
-    }
+    ws.player.play = () => _('video').play();
 
     ws.player.updateTime = timeStamp => {
-        // Need to test (attempting to prevent data being sent back)
         ws.player.prevTimeStamp = timeStamp;
         _('video').currentTime = timeStamp;
-        console.log(`changed time to : ${timeStamp}`);
     }
 
     // Listeners
-    ws.player.pauseListener = () => {
-        console.log('pause');
-        ws.player.sendEvent(args.events.pause);
-    }
+    ws.player.pauseListener = () => ws.player.sendEvent(args.events.pause);
 
-    ws.player.playListener = () => {
-        console.log('playing');
-        ws.player.sendEvent(args.events.play);
-    }
+    ws.player.playListener = () => ws.player.sendEvent(args.events.play);
 
     ws.player.timeUpdateListener = () => {
-        const minManualAdjGap = .5;
-
-        if (Math.abs(_('video').currentTime - ws.player.prevTimeStamp) > minManualAdjGap) {
-            console.log('time gap exists');
+        if (Math.abs(_('video').currentTime - ws.player.prevTimeStamp) > ws.player.minManualAdjGap) {
             ws.player.sendEvent(args.events.timeUpdate, _('video').currentTime);
         }
 
@@ -89,18 +72,25 @@ export function init(args) {
     _('video').on('timeupdate', ws.player.timeUpdateListener);
 
     ws.onmessage = (event) => {
-        const limiter = 150;
 
-        if (Date.now() - ws.player.currentTime > limiter) {
-            event.data.text().then(result => {
-                let obj = JSON.parse(result);
-                console.log(obj.data);
-                console.log(obj);
-                ws.player[`${obj.event}`](obj.data);
-            });
-        }
+        // Prevent infinite socket messaging glitch
+        const minEventInterval = 100;
 
-        ws.player.currentTime = Date.now();
+        event.data.text().then(result => {
+            let obj = JSON.parse(result);
+            if (obj.id !== args.id) {
+                if (Date.now() - ws.player.currentTime < minEventInterval) {
+                    ws.player.consecutiveEventCount++;
+                } else {
+                    ws.player.consecutiveEventCount = 0;
+                }
+
+                if (ws.player.consecutiveEventCount <= 1) {
+                    ws.player[`${obj.event}`](obj.data);
+                    ws.player.currentTime = Date.now();
+                }
+            }
+        });
     }
 
     ws.sendMessage();

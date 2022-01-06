@@ -48,11 +48,12 @@ chrome.runtime.onMessage.addListener(async (request) => {
                 }
             ]);
             break;
-        case m.server.init.runScript:
-            await inject(tab, server.init, [{
+        case m.server.sync.runScript:
+            await inject(tab, server.sync, [{
                 key: await getCache(m.caches.key),
-                message: m.server.init.status,
+                message: m.server.sync.status,
                 events: m.video.events,
+                id: await getCache(m.caches.id)
             }]);
             break;
         case m.server.destroy.runScript: 

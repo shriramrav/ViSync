@@ -17,7 +17,7 @@ export default {
             status: 'tIVSkVefJp',
             runScript: 'XXBBqabYOL'
         },
-        init: {
+        sync: {
             status: 'aflZjFaurJ',
             runScript: 'PuHyziODac'
         },

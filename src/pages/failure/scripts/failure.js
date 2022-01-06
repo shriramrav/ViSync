@@ -11,7 +11,12 @@ function listener() {
 async function main() {
     _('#close-btn').on('click', listener);
 
-    if (await inject(m.video)) {
+    let result = await inject(m.video);
+
+    console.log(result);
+
+
+    if (result) {
         window.location.href = cd(window.location.href, '../../main/main.html');
     }
 }

@@ -52,7 +52,7 @@ function listener() {
             return Promise.reject();
         }
 
-        await inject(m.server.init);
+        await inject(m.server.sync);
 
         // Set up disconnect
         _('button').removeClasses(['loading-anim']);
