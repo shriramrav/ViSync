@@ -5,7 +5,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     mode: 'development',
-    entry: "./src/index.js",
+    devtool: 'cheap-module-source-map',
+    entry: ["./src/index.js", "./worker.js"],
     output: {
         path: path.resolve(__dirname, 'production'),
         filename: 'bundler.js'
@@ -47,6 +48,9 @@ module.exports = {
                     globOptions: {
                         ignore: ['**/index.html']
                     }
+                },
+                {
+                    from: 'src/worker.js'
                 }
             ]
         })
