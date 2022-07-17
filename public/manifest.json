@@ -4,7 +4,7 @@
     "version": "0.01",
     "description": "A way to synchronize video streams",
     "background": {
-        "service_worker": "bundler.js",
+        "service_worker": "sw.js",
         "type": "module"
     },
     "permissions": [
