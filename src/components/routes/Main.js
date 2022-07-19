@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Button from "../utility/Button";
 import { useNavigate } from "react-router-dom";
+import { server } from '../../modules/messages';
+import inject from '../../modules/inject';
 import "../../style.css";
 
 function Main(props) {
@@ -9,16 +11,16 @@ function Main(props) {
 
   let navigate = useNavigate();
 
-  let onCreateClick = () => {
+  let onCreateClick = async () => {
     setCreateButtonAddClass("loading-anim");
     setCreateButtonText(
-      "Loading...".split("").map((char) => <span>{char}</span>)
+      "Loading...".split("").map((char, index) => <span key={index}>{char}</span>)
     );
 
-    navigate("./create");
+    if ((await inject(server.connect)).data !== server.events.error) {
+      navigate("./create");
+    }
   };
-
-  
 
   return (
     <>

@@ -1,7 +1,7 @@
 import React from "react";
 
-function Test(props) {
-  return <h1>this is test</h1>;
+function Create(props) {
+  return <h1>Create page</h1>;
 }
 
-export default Test;
+export default Create;
