@@ -35,10 +35,10 @@ const server = {
 
 const servers = ["wv4x8oubeg"];
 
-const caches = {
+const cacheKeys = {
   key: "pkKWEFkEuL",
   id: "bSLudtDQAM",
-  server: "trQhLHKNwu",
+  // server: "trQhLHKNwu",
 };
 
-export { video, server, servers, caches };
+export { video, server, servers, cacheKeys };

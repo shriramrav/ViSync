@@ -18,7 +18,6 @@ export default function(message) {
 }
 
 // Service worker injection 
-// Note: args should maintain [message, obj] form
 export function inject(tab, func, args = []) {
     return new Promise(
         resolve => chrome.scripting.executeScript({

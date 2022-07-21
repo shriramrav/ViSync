@@ -2,6 +2,7 @@ import * as m from './modules/messages';
 import { scan } from './modules/video';
 import * as server from './modules/server'
 import { inject } from './modules/inject';
+import { getCache } from './modules/cache';
 
 function getActiveId() {
     return new Promise((resolve) => {
@@ -17,6 +18,7 @@ chrome.runtime.onMessage.addListener(async (request) => {
 
     switch (request.message) {
         case m.video.runScript:
+            console.log("video injection called")
             await inject(tab, scan, [ m.video.status ]);
             break;
 
@@ -30,5 +32,17 @@ chrome.runtime.onMessage.addListener(async (request) => {
             ]);
 
             break;
+        case m.server.registerUser.runScript:
+
+
+
+            await inject(tab, server.registerUser, [
+                m.server.registerUser.status, {
+                    // errorMessage: m.server.events.errorMessage,
+                    key: await getCache(m.cacheKeys.key),
+                    id: await getCache(m.cacheKeys.id),
+                    event: m.server.events.registerUser
+                }
+            ])
     }
 });
