@@ -1,9 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router";
 import inject from "../modules/inject";
-import { video } from "../modules/messages";
 import { generateRandomKey } from "../modules/keys";
-
 import Page from "./Page";
 import { cache } from "../modules/cache";
 import { cacheKeys, server } from "../modules/messages";
