@@ -1,3 +1,4 @@
+// Change to scan for video player
 export function scan(message) {
   console.log("video test");
 

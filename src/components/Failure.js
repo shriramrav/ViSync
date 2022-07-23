@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
-import inject from "../modules/inject";
+import {requestResponse} from "../modules/requestResponse";
 import { video } from "../modules/messages";
 import Page from "./Page";
 
@@ -10,8 +10,8 @@ function Failure(props) {
   useEffect(() => {
     console.log('thisu ran');
 
-    inject(video).then((resolve) => (resolve ? navigate("/main") : null));
-  });
+    requestResponse(video).then((resolve) => (resolve ? navigate("/main") : null));
+  }, []);
 
   return (
     <Page

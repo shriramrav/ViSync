@@ -3,7 +3,7 @@ import Button from "./Button";
 import Page from "./Page";
 import { useNavigate } from "react-router-dom";
 import { server } from "../modules/messages";
-import inject from "../modules/inject";
+import {requestResponse} from "../modules/requestResponse";
 import "../style.css";
 
 function Main(props) {
@@ -20,12 +20,12 @@ function Main(props) {
         .map((char, index) => <span key={index}>{char}</span>)
     );
 
-    if ((await inject(server.connect)).data !== server.events.error) {
+    // if ((await inject(server.connect)).data !== server.events.error) {
 
-      // console.log((await inject(server.registerUser)).data);
+    //   // console.log((await inject(server.registerUser)).data);
 
-      navigate("../create");
-    }
+    //   navigate("../create");
+    // }
   };
 
 

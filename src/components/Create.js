@@ -1,5 +1,5 @@
 import React from "react";
-import inject from "../modules/inject";
+import inject from "../modules/requestResponse";
 import { generateRandomKey } from "../modules/keys";
 import Page from "./Page";
 import { cache } from "../modules/cache";
@@ -25,9 +25,9 @@ class Create extends React.Component {
 
     await cache(cacheKeys.id, key);
     await cache(cacheKeys.key, key);
-    setState({
-      key: (await inject(server.registerUser)).key
-    });
+    // setState({
+    //   key: (await inject(server.registerUser)).key
+    // });
 
     // console.log(data);
   }
