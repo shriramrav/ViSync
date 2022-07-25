@@ -1,6 +1,6 @@
 // Utility functions for service worker
 
-function getActiveId() {
+function getActiveTabId() {
   return new Promise((resolve) => {
     chrome.tabs.query(
       {
@@ -13,7 +13,7 @@ function getActiveId() {
 }
 
 
-function inject(tab, func, args = []) {
+function injectFunc(tab, func, ...args) {
     return new Promise(
         resolve => chrome.scripting.executeScript({
             target: { 
@@ -25,5 +25,17 @@ function inject(tab, func, args = []) {
     );
 }
 
+function injectFile(tab, file) {
+  return new Promise(
+      resolve => chrome.scripting.executeScript({
+          target: { 
+              tabId: tab 
+          },
+          files: [file]
+      }, resolve)
+  );
+}
 
-export { getActiveId, inject };
+
+
+export { getActiveTabId, injectFunc, injectFile };

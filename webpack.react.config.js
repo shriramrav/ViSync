@@ -9,7 +9,7 @@ module.exports = {
     entry: "./src/index.js",
     output: {
         path: path.resolve(__dirname, 'production'),
-        filename: 'bundler.js'
+        filename: 'index.js'
     },
     module: {
         rules: [

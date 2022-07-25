@@ -1,11 +1,16 @@
-const video = {
-  status: "vRPriIQaKL",
-  runScript: "ALSRIUcbWS",
-  events: {
-    play: "play",
-    pause: "pause",
-    timeUpdate: "updateTime",
-  },
+const getExtensionInfo = {
+  request: "jWe143lJ58",
+  response: "AvKegfDKB0",
+};
+
+const checkForVideoPlayer = {
+  request: "vRPriIQaKL",
+  response: "ALSRIUcbWS",
+};
+
+const injectContentIfNeeded = {
+  request: "pkKWEFkEuL",
+  response: "bSLudtDQAM",
 };
 
 const server = {
@@ -35,10 +40,13 @@ const server = {
 
 const servers = ["wv4x8oubeg"];
 
-const cacheKeys = {
-  key: "pkKWEFkEuL",
-  id: "bSLudtDQAM",
-  // server: "trQhLHKNwu",
-};
+const connectInfo = { name: "visync" };
 
-export { video, server, servers, cacheKeys };
+export {
+  checkForVideoPlayer,
+  server,
+  servers,
+  connectInfo,
+  injectContentIfNeeded,
+  getExtensionInfo
+};

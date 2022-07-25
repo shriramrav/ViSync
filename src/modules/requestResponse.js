@@ -1,19 +1,31 @@
-// Method to help communicate between service worker, injected scripts, and popup
-function requestResponse(message) {
+function requestResponseSendMessage(message) {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage({
-      message: message.runScript,
-    });
+    chrome.runtime.sendMessage(message);
 
-    const eventListener = (event) => {
-      if (event.message === message.status) {
-        chrome.runtime.onMessage.removeListener(eventListener);
+    const listener = (event) => {
+      if (event.response === message.response) {
+        chrome.runtime.onMessage.removeListener(listener);
         resolve(event.data);
       }
     };
 
-    chrome.runtime.onMessage.addListener(eventListener);
+    chrome.runtime.onMessage.addListener(listener);
   });
 }
 
-export { requestResponse };
+function requestResponsePort(port, message) {
+  return new Promise((resolve) => {
+    port.postMessage(message);
+
+    const listener = (event) => {
+      if (event.response === message.response) {
+        port.onMessage.removeListener(listener);
+        resolve(event.data);
+      }
+    };
+
+    port.onMessage.addListener(listener);
+  });
+}
+
+export { requestResponseSendMessage, requestResponsePort };

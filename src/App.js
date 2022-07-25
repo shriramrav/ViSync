@@ -1,18 +1,27 @@
-import React from "react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Main from "./components/Main";
-import Create from './components/Create';
+import Create from "./components/Create";
 import Failure from "./components/Failure";
+import { requestResponseSendMessage } from "./modules/requestResponse";
+import { getExtensionInfo } from "./modules/messages";
 
 function App(props) {
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    requestResponseSendMessage(getExtensionInfo).then((result) =>
+      navigate(`/${result.page}`)
+    );
+  }, []);
+
   return (
-    <MemoryRouter>
-      <Routes>
-        <Route exact path="/" element={<Failure />} />
-        <Route exact path="/main" element={<Main />} />
-        <Route exact path="/create" element={<Create/>}/>
-      </Routes>
-    </MemoryRouter>
+    <Routes>
+      <Route exact path="/" element={<></>} />
+      <Route exact path="/failure" element={<Failure />} />
+      <Route exact path="/main" element={<Main />} />
+      <Route exact path="/create" element={<Create />} />
+    </Routes>
   );
 }
 

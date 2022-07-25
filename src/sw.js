@@ -1,75 +1,93 @@
 import * as m from "./modules/messages";
-import { scan } from "./modules/video";
-import { getActiveId, inject } from "./modules/utility";
-import testFunc from "./modules/test1";
-import temp1 from "./modules/temp1";
-// Store injected tab in activeExtensionTabs
+import { injectFile, injectFunc, getActiveTabId } from "./modules/utility";
+import {
+  requestResponsePort,
+  requestResponseSendMessage,
+} from "./modules/requestResponse";
+import checkForVideoPlayer from "./modules/checkForVideoPlayer";
+import { generateRandomKey } from "./modules/keys";
 
-console.log("hello");
-let activeExtensionTabs = null;
+let extensionInfo = {};
+let activeExtensionTab = null;
+let ports = {};
 
-chrome.tabs.onUpdated.addListener((tabId) => {
-  if (activeExtensionTabs === tabId) {
-    activeExtensionTabs = null;
+// Event listener functions
+
+function resetTab(tabId) {
+  if (activeExtensionTab === tabId) {
+    activeExtensionTab = null;
   }
-});
+  delete extensionInfo[tabId];
+  delete ports[tabId];
+}
 
-chrome.tabs.onRemoved.addListener((tabId) => {
-  if (activeExtensionTabs === tabId) {
-    activeExtensionTabs = null;
+// Change function name later
+function initializeTab(tabId) {
+  if (extensionInfo[tabId] === undefined) {
+    // Message for checking if video player exists
+    let message = {
+      request: generateRandomKey(),
+      response: generateRandomKey(),
+    };
+
+    let data = {
+      page: "failure",
+      key: "",
+    };
+
+    requestResponseSendMessage(message).then((result) => {
+      if (result) {
+        data.page = "main";
+
+        // Check if this saves time while opening popup
+        injectFile(tabId, "content.js");
+      }
+    });
+
+    injectFunc(tabId, checkForVideoPlayer, message);
+
+    extensionInfo[tabId] = data;
   }
-});
 
-// change request name to event
-chrome.runtime.onMessage.addListener(async (request) => {
+  // Add check for if another tab already has room created
+}
 
+async function onConnectEventListener(port) {
+  ports[await getActiveTabId()] = port;
+  // setTimeout(() => {
+  //   port.postMessage("hello");
+  //   console.log("port added to ports obj");
+  // }, 2000);
+}
 
+async function onMessageEventListener(message) {
+  let tabId = await getActiveTabId();
+  let shouldSendMessage = true;
 
-  let tab = await getActiveId();
-
-  await inject(tab, temp1, [m]);
-
-
-  // chrome.scripting.executeScript({
-  //   target: { tabId: tab },
-  //   files: ['test2.js']
-  // });
-  const channel = new BroadcastChannel('hello-world');
-  channel.postMessage('sup');
-
-  console.log(tab);
-
-  // This is test
-  await inject(tab, testFunc, []);
-
-  switch (request.message) {
-    case m.video.runScript:
-      console.log("video injection called");
-      await inject(tab, scan, [m.video.status]);
+  switch (message.request) {
+    case m.getExtensionInfo.request:
+      message.data = extensionInfo[tabId];
       break;
-
-    
-
-    
-    // case m.server.connect.runScript:
-    //   await inject(tab, server.connect, [
-    //     m.server.connect.status,
-    //     {
-    //       server: m.servers[0],
-    //       errorMessage: m.server.events.errorMessage,
-    //     },
-    //   ]);
-
-    //   break;
-    // case m.server.registerUser.runScript:
-    //   await inject(tab, server.registerUser, [
-    //     m.server.registerUser.status,
-    //     {
-    //       // errorMessage: m.server.events.errorMessage,
-    //       key: await getCache(m.cacheKeys.key),
-    //       id: await getCache(m.cacheKeys.id),
-    //       event: m.server.events.registerUser,
-    //     },
-    //   ]);
+    default:
+      shouldSendMessage = false;
   }
-});
+
+  if (shouldSendMessage) {
+    // CAUTION: make sure for no infinite message sending
+    chrome.runtime.sendMessage(message);
+  }
+}
+
+// Binds all event listeners
+chrome.tabs.onUpdated.addListener(resetTab);
+chrome.tabs.onUpdated.addListener(initializeTab);
+
+chrome.tabs.onRemoved.addListener(resetTab);
+
+chrome.tabs.onActivated.addListener(({ tabId } = {}) => initializeTab(tabId));
+
+chrome.runtime.onConnect.addListener(onConnectEventListener);
+
+chrome.runtime.onMessage.addListener(onMessageEventListener);
+
+console.log("Service Worker Running");

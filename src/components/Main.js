@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Button from "./Button";
 import Page from "./Page";
 import { useNavigate } from "react-router-dom";
-import { server } from "../modules/messages";
-import {requestResponse} from "../modules/requestResponse";
 import "../style.css";
 
 function Main(props) {
