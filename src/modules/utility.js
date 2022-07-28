@@ -12,30 +12,39 @@ function getActiveTabId() {
   });
 }
 
-
 function injectFunc(tab, func, ...args) {
-    return new Promise(
-        resolve => chrome.scripting.executeScript({
-            target: { 
-                tabId: tab 
-            },
-            func: func,
-            args: args
-        }, resolve)
-    );
-}
-
-function injectFile(tab, file) {
-  return new Promise(
-      resolve => chrome.scripting.executeScript({
-          target: { 
-              tabId: tab 
-          },
-          files: [file]
-      }, resolve)
+  return new Promise((resolve) =>
+    chrome.scripting.executeScript(
+      {
+        target: {
+          tabId: tab,
+        },
+        func: func,
+        args: args,
+      },
+      resolve
+    )
   );
 }
 
+function injectFile(tab, file) {
+  return new Promise((resolve) =>
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: tab },
+        files: [file],
+      },
+      resolve
+    )
+  );
+}
 
+// Utility functions for content script
 
-export { getActiveTabId, injectFunc, injectFile };
+function rejectErrors(func) {
+  try {
+    func();
+  } catch (err) {}
+}
+
+export { getActiveTabId, injectFunc, injectFile, rejectErrors };

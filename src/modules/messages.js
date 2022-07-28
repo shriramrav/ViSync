@@ -14,13 +14,9 @@ const injectContentIfNeeded = {
 };
 
 const server = {
-  connect: {
-    status: "sNdpaVKlSR",
-    runScript: "VKJINmRnzJ",
-  },
   registerUser: {
-    status: "tIVSkVefJp",
-    runScript: "XXBBqabYOL",
+    request: "tIVSkVefJp",
+    response: "XXBBqabYOL",
   },
   sync: {
     status: "aflZjFaurJ",

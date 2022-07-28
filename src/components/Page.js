@@ -1,22 +1,14 @@
 import React from "react";
-import Button from './Button';
-import "../style.css";
-
+import Button from "./Button";
 
 function Page(props) {
   return (
-    <>
-      <div className="centered container">
-        <p>{props.text}</p>
-      </div>
+    <div className="centered container">
+      <p>{props.text}</p>
       {props.children}
-      <Button
-        text={props.buttonProps.text}
-        onClick={props.buttonProps.onClick}
-        addClass={props.buttonProps.addClass}
-      />
+      <Button {...props.buttonProps} />
       {props.footer}
-    </>
+    </div>
   );
 }
 

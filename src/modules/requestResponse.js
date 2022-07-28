@@ -1,3 +1,5 @@
+import { injectFunc } from "./utility";
+
 function requestResponseSendMessage(message) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message);
@@ -28,4 +30,15 @@ function requestResponsePort(port, message) {
   });
 }
 
-export { requestResponseSendMessage, requestResponsePort };
+function requestResponseInjectFunc(tabId, func, message) {
+  return new Promise((resolve) => {
+    requestResponseSendMessage(message).then((result) => resolve(result));
+    injectFunc(tabId, func, message);
+  });
+}
+
+export {
+  requestResponseSendMessage,
+  requestResponsePort,
+  requestResponseInjectFunc,
+};

@@ -1,49 +1,15 @@
 import React from "react";
-import { generateRandomKey } from "../modules/keys";
-import Page from "./Page";
-// import { server }
+import Input from "./Input";
+import buttonProps from "../modules/disconnectButtonProps";
 
-class Create extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      key: ""
-    }
-  }
-
-
-  //For saving extension data, use injected variable on tab
-
-  async componentDidMount() {
-
-    console.log('create page loaded');
-
-    let key = generateRandomKey();
-
-    // await cache(cacheKeys.id, key);
-    // await cache(cacheKeys.key, key);
-    // setState({
-    //   key: (await inject(server.registerUser)).key
-    // });
-
-    // console.log(data);
-  }
-
-  // async componentWillMount
-
-  render() {
-    return (
-      <Page
-        text="Use the following key to have others join the room."
-        buttonProps={{
-          text: "Close",
-          onClick: () => window.close(),
-        }}
-      >
-        <p>IT is me</p>
-      </Page>
-    );
-  }
+function Create(props) {
+  return (
+    <Input
+      text="You have successfully joined a room! To add others, share the following key."
+      inputProps={{ defaultValue: props.keyValue }}
+      buttonProps={buttonProps}
+    />
+  );
 }
 
 export default Create;

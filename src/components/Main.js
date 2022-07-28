@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "./Button";
 import Page from "./Page";
 import { useNavigate } from "react-router-dom";
-import "../style.css";
+import { popupRegisterUser } from "../modules/popupRegisterUser";
 
 function Main(props) {
   const [createButtonAddClass, setCreateButtonAddClass] = useState("");
@@ -10,7 +10,7 @@ function Main(props) {
 
   let navigate = useNavigate();
 
-  let onCreateClick = async () => {
+  let onCreateClick = () => {
     setCreateButtonAddClass("loading-anim");
     setCreateButtonText(
       "Loading..."
@@ -18,15 +18,13 @@ function Main(props) {
         .map((char, index) => <span key={index}>{char}</span>)
     );
 
-    // if ((await inject(server.connect)).data !== server.events.error) {
-
-    //   // console.log((await inject(server.registerUser)).data);
-
-    //   navigate("../create");
-    // }
+    popupRegisterUser("create")
+      .then((result) => {
+        props.keyHandler(result.key);
+        navigate("../create");
+      })
+      .catch(() => console.log("Error Registering User"));
   };
-
-
 
   return (
     <Page
@@ -36,7 +34,7 @@ function Main(props) {
         addClass: createButtonAddClass,
         onClick: onCreateClick,
       }}
-      footer={<Button text="Join room" />}
+      footer={<Button text="Join room" onClick={() => navigate("../join")} />}
     />
   );
 }

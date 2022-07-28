@@ -1,6 +1,5 @@
 /* TODO - Remove all extra css classes */
 
-
 html {
   /* Variables */
   --body-width: 325px;
@@ -8,9 +7,9 @@ html {
   --button-height: 43px;
   --button-font-size: 15px;
   --container-width: 95%;
-  --space-padding-bottom: 35px;
 
   --colors-background: rgb(36, 36, 36);
+
   --colors-button: rgb(124, 158, 178);
   --colors-button-hover: rgb(159, 180, 179);
   --colors-text: rgb(223, 224, 226);
@@ -25,26 +24,33 @@ body {
   font-family: var(--fonts-global);
   color: var(--colors-text);
   font-size: var(--font-size);
+  caret-color: transparent;
+
+  background: radial-gradient(ellipse at bottom, #0d1b31 0%, #110c13 100%);
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+
+  animation: body-anim 5s ease infinite;
+
+  color: #eeeeee;
+}
+
+@keyframes body-anim {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 b {
   font-weight: bold;
-}
-
-.shadowed {
-  box-shadow: 0 0px 8px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
-}
-
-.shadowed2 {
-  box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 20px 0 rgba(0, 0, 0, 0.1);
-}
-
-.shadowed3 {
-  box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 4px 0 rgba(0, 0, 0, 0.5);
-}
-
-.space {
-  padding-bottom: var(--space-padding-bottom);
 }
 
 .centered {
@@ -56,14 +62,18 @@ b {
 }
 
 .button {
+  width: 100%;
   background-color: var(--colors-button);
   color: var(--colors-content);
-  border-radius: var(--button-border-radius);
+  border-radius: 5px;
+
   border: none;
   display: block;
   font-size: var(--button-font-size);
+  /* font-size: 15px; */
   height: var(--button-height);
   animation: button-leave 0.2s;
+  box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.2), 0 0px 10px 0 rgba(0, 0, 0, 0.2);
   margin-bottom: 10px;
 }
 
@@ -185,4 +195,30 @@ b {
 
 .loading-anim b span:nth-child(10) {
   animation-delay: 0.2s;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  height: var(--button-height);
+  background: transparent;
+  backdrop-filter: blur(10px);
+
+  resize: none;
+  outline: none;
+
+  text-align: center;
+
+  font-family: var(--fonts-global);
+
+  font-size: 18px;
+
+  caret-color: transparent;
+
+  color: var(--colors-button);
+
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 18px;
+  font-weight: bold;
 }

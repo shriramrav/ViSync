@@ -1,32 +1,37 @@
 import * as m from "./modules/messages";
+// import { rejectErrors } from "./modules/utility";
+import { registerUser } from "./modules/socket";
 
 let port = chrome.runtime.connect(m.connectInfo);
+let socket;
 
-console.log(port);
+//
 
+async function onMessageEventListener(message) {
+  let caseTriggered = true;
 
-function onMessageEventListener(message) {
+  switch (message.request) {
+    case m.server.registerUser.request:
+      let newData = await registerUser(socket, message.data);
 
-    let caseTriggered = true;
+      console.log('newData');
+      console.log(newData);
 
-    switch (message.request) {
-        // case m.checkForVideoPlayer.request:
-        //     message.data = checkForVideoPlayer();
-        //     break;
-        default:
-            console.log('case not triggered, the following is the message:');
-            console.log(message);
-            caseTriggered = false;
-    }
+      message.data = newData;
+      break;
 
-    if (caseTriggered) {
-        port.postMessage(message);
-    }
+    default:
+      console.log("case not triggered, the following is the message:");
+      console.log(message);
+      caseTriggered = false;
+  }
+
+  if (caseTriggered) {
+    port.postMessage(message);
+  }
 }
-
 
 // Event listeners
 port.onMessage.addListener(onMessageEventListener);
 
-
-console.log('done');
+console.log("done");

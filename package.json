@@ -17,11 +17,16 @@
     "webpack-cli": "^4.10.0"
   },
   "scripts": {
+    "start": "react-scripts start",
     "webpack:react": "webpack --config webpack.react.config.js",
     "webpack:sw": "webpack --config webpack.sw.config.js",
     "webpack:content": "webpack --config webpack.content.config.js"
   },
   "eslintConfig": {
+    "env": {
+      "webextensions": true,
+      "browser": true
+    },
     "extends": [
       "react-app",
       "react-app/jest"
