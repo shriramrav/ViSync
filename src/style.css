@@ -62,8 +62,13 @@ b {
 }
 
 .button {
-  width: 100%;
+
+  transition: background-color .2s ease;
   background-color: var(--colors-button);
+
+  
+  width: 100%;
+  /* background-color: var(--colors-button); */
   color: var(--colors-content);
   border-radius: 5px;
 
@@ -221,4 +226,9 @@ b {
   border-bottom: 1px solid #aaa;
   margin-bottom: 18px;
   font-weight: bold;
+}
+
+.error {
+  transition: background-color .2s ease;
+  background-color: rgb(212, 85, 85);
 }

@@ -34,7 +34,7 @@ const server = {
   },
 };
 
-const servers = ["wv4x8oubeg"];
+const servers = ["visync", "visync-dev"];
 
 const connectInfo = { name: "visync" };
 

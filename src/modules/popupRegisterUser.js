@@ -2,6 +2,7 @@ import { generateRandomKey } from "./keys";
 import { requestResponseSendMessage } from "./requestResponse";
 import { server } from "./messages";
 
+// Fix args later
 function popupRegisterUser(page, key=generateRandomKey()) {
   return new Promise((resolve, reject) => {
     let id = page === "create" ? key : generateRandomKey();
@@ -10,7 +11,7 @@ function popupRegisterUser(page, key=generateRandomKey()) {
     let message = structuredClone(server.registerUser);
 
     message.data = {
-      page: page,
+      page: "create",
       // Same key for both key and id prop is for create page
       event: server.events.registerUser,
       id: id,
@@ -18,14 +19,21 @@ function popupRegisterUser(page, key=generateRandomKey()) {
     };
 
     requestResponseSendMessage(message).then((result) => {
+
+      console.log("result:::::::");
+        console.log(result);
+
       // Change to ternary operator later
       if (result.data !== server.events.error) {
 
-        console.log("result:::::::");
-        console.log(result);
+        console.log('resolve incoming');
+        
 
         resolve(result);
       } else {
+
+        console.log('reject incoming');
+
         reject();
       }
     });

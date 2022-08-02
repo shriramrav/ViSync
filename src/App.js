@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
+// import { useStateCallback } from "use"
 
 import Main from "./components/Main";
 import Create from "./components/Create";
@@ -16,15 +17,16 @@ function App(props) {
   let keyHandler = (newkey) => setKey(newkey);
 
   useEffect(() => {
-    requestResponseSendMessage(getExtensionInfo).then((result) =>
-      navigate(`/${result.page}`)
-    );
+    requestResponseSendMessage(getExtensionInfo).then((result) => {
+      setKey(result.key);
+      navigate(`/${result.page}`);
+    });
 
     // navigate("/create");
     // navigate("/main");
-
   }, []);
 
+  // useEffect(() => window.postMessage('asdfasdfasd'), []);
 
   return (
     <Routes>
@@ -32,7 +34,7 @@ function App(props) {
       <Route exact path="/failure" element={<Failure />} />
       <Route exact path="/main" element={<Main keyHandler={keyHandler} />} />
       <Route exact path="/create" element={<Create keyValue={key} />} />
-      <Route exact path="/join" element={<Join keyValue={key} />} />
+      <Route exact path="/join" element={<Join keyHandler={keyHandler} />} />
     </Routes>
   );
 }

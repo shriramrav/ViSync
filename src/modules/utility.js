@@ -39,7 +39,35 @@ function injectFile(tab, file) {
   );
 }
 
-// Utility functions for content script
+// Utility for content script
+
+class ReferencableBoolean {
+  constructor(value) {
+    this.value = value;
+  }
+
+  set(value) {
+    this.value = value;
+  }
+
+  state() {
+    return this.value;
+  }
+}
+
+function addToggle(func, setTrueIfFalse = true) {
+  let toggle = new ReferencableBoolean(true);
+
+  let newFunc = () => {
+    if (toggle.state()) {
+      func();
+    } else {
+      toggle.set(setTrueIfFalse);
+    }
+  };
+
+  return [newFunc, disabler];
+}
 
 function rejectErrors(func) {
   try {
@@ -47,4 +75,4 @@ function rejectErrors(func) {
   } catch (err) {}
 }
 
-export { getActiveTabId, injectFunc, injectFile, rejectErrors };
+export { getActiveTabId, injectFunc, injectFile, rejectErrors, addToggle };

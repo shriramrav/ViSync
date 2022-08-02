@@ -2,6 +2,8 @@ import React from "react";
 import Input from "./Input";
 import buttonProps from "../modules/disconnectButtonProps";
 
+// Change name to connected
+
 function Create(props) {
   return (
     <Input

@@ -32,7 +32,7 @@ function requestResponsePort(port, message) {
 
 function requestResponseInjectFunc(tabId, func, message) {
   return new Promise((resolve) => {
-    requestResponseSendMessage(message).then((result) => resolve(result));
+    requestResponseSendMessage(message).then(resolve);
     injectFunc(tabId, func, message);
   });
 }

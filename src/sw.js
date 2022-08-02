@@ -1,11 +1,13 @@
 import * as m from "./modules/messages";
-import { injectFile, getActiveTabId } from "./modules/utility";
+import { injectFile, getActiveTabId, injectFunc } from "./modules/utility";
 import {
   requestResponsePort,
   requestResponseInjectFunc,
 } from "./modules/requestResponse";
 import checkForVideoPlayer from "./modules/checkForVideoPlayer";
 import { generateRandomKey } from "./modules/keys";
+import windowPostMessage from "./modules/windowPostMessage";
+import getExtensionInfo from "./modules/getExtensionInfo";
 
 let extensionInfo = {};
 let activeExtensionTab = null;
@@ -70,15 +72,27 @@ async function onMessageEventListener(message) {
   switch (message.request) {
     case m.getExtensionInfo.request:
       // Test
-      await initializeTab(tabId);
+      // await initializeTab(tabId);
 
       console.log("initalizeTab finished");
 
       message.data = extensionInfo[tabId];
+
+
+      injectFunc(tabId, getExtensionInfo, message);
+
+
+
+      shouldSendMessage = false;
       break;
     case m.server.registerUser.request:
       let result = await requestResponsePort(ports[tabId], message);
 
+
+      if (result.data !== m.server.events.error) {
+        // 
+        extensionInfo[tabId] = result;
+      }
       console.log("From service worker");
       console.log(result);
       console.log(m.server.events.error);
@@ -88,6 +102,10 @@ async function onMessageEventListener(message) {
       message.data = result;
 
       break;
+    case m.server.destroy.request:
+      await injectFunc(tabId, windowPostMessage, message);
+      delete extensionInfo[tabId];
+
     default:
       shouldSendMessage = false;
   }
@@ -104,5 +122,7 @@ chrome.tabs.onRemoved.addListener(resetTab);
 
 chrome.runtime.onConnect.addListener(onConnectEventListener);
 chrome.runtime.onMessage.addListener(onMessageEventListener);
+
+// chrome.runtime.onActivated.addListener()
 
 console.log("Service Worker Running");

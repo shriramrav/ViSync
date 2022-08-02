@@ -11,6 +11,9 @@ function Main(props) {
   let navigate = useNavigate();
 
   let onCreateClick = () => {
+
+    document.querySelectorAll('button').forEach((e) => e.disabled = true);
+
     setCreateButtonAddClass("loading-anim");
     setCreateButtonText(
       "Loading..."

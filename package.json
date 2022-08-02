@@ -13,6 +13,7 @@
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "socket.io-client": "^4.5.1",
     "web-vitals": "^2.1.4",
     "webpack-cli": "^4.10.0"
   },
@@ -20,7 +21,9 @@
     "start": "react-scripts start",
     "webpack:react": "webpack --config webpack.react.config.js",
     "webpack:sw": "webpack --config webpack.sw.config.js",
-    "webpack:content": "webpack --config webpack.content.config.js"
+    "webpack:content": "webpack --config webpack.content.config.js",
+    "t:sw": "webpack --config webpack.sw.test.config.js",
+    "t:c": "webpack --config webpack.content.test.config.js"
   },
   "eslintConfig": {
     "env": {
