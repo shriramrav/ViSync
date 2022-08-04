@@ -24,7 +24,9 @@ const getInfo = (message, sendChromeMessage = true) => {
   return result;
 };
 
-const removeInfo = () => delete window.viSyncInfo;
+const removeInfo = () => {
+  console.log('info is being disconnected');
+  delete window.viSyncInfo;};
 
 const updateInfo = (obj) => Object.assign(window.viSyncInfo, obj);
 

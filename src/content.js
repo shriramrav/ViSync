@@ -12,10 +12,8 @@ console.log(tabId);
 
 const channelName = `visync-${tabId}`;
 
-
 let channel = new BroadcastChannel(channelName);
 let videoSync;
-
 
 console.log(channelName);
 
@@ -29,64 +27,23 @@ const functionMap = {
 
 // Response functions
 
-function createRoomSuccess(message) {
-  chrome.runtime.sendMessage(Object.assign(message, { data: socket.id }));
-
-  updateInfo({ page: "connected", key: socket.id });
-
-  console.log(`socket connected: ${socket.connected}`);
-
-  console.log(" videoSync about to run");
-
-  videoSync = sync(socket);
-}
-
 function createRoom(message) {
-  // console.log(socket._callbacks);
-  // console.log(socket._callbacks["$joinRoom"]);
-
-  // socket.removeAllListeners("joinRoom");
-  // console.log(socket._callbacks['$joinRoom']);
+  socket.removeAllListeners("createRoom");
+  socket.on("createRoom", (key) => responseHandler(message, key, key));
 
   if (socket.connected) {
-
-    createRoomSuccess(message);
+    socket.emit("createRoom");
   } else {
-    socket.on("connect", () => createRoomSuccess(message));
+    socket.on("connect", socket.emit("createRoom"));
   }
-
-  // socket.on("connect", () => {
-  //   chrome.runtime.sendMessage(Object.assign(message, { data: socket.id }));
-
-  //   updateInfo({ page: "connected", key: socket.id });
-
-  //   console.log(`socket connected: ${socket.connected}`);
-
-  //   console.log(" videoSync about to run");
-
-  //   videoSync = sync(socket);
-  // });
-
-  // socket.on("disconnect", destroy);
 }
 
 function joinRoom(message) {
-  console.log(message);
+  const { key } = message;
 
   socket.removeAllListeners("joinRoom");
-
-  // Resets handler for new message obj
   socket.on("joinRoom", (result) => {
-    console.log("joinRoom recieved");
-    console.log(message.key);
-    console.log(result);
-
-    chrome.runtime.sendMessage(Object.assign(message, { data: result }));
-    if (result) {
-      updateInfo({ page: "connected", key: message.key });
-
-      videoSync = sync(socket);
-    }
+    responseHandler(message, key, result, result);
   });
 
   if (socket.connected) {
@@ -94,27 +51,6 @@ function joinRoom(message) {
   } else {
     socket.on("connect", () => socket.emit("joinRoom", message.key));
   }
-
-  // if (socket == undefined) {
-  //   console.log("socket undefined ran");
-
-  //   socket = io(url);
-
-  //   socket.on("connect", () => socket.emit("joinRoom", message.key));
-  //   socket.on("joinRoom", (result) => {
-  //     console.log("joinRoom recieved");
-  //     console.log(result);
-  //     chrome.runtime.sendMessage(Object.assign(message, { data: result }));
-  //     if (result) {
-  //       updateInfo({ page: "connected", key: message.key });
-
-  //       videoSync = sync(socket);
-  //     }
-  //   });
-  //   socket.on("disconnect", destroy);
-  // } else {
-  //   socket.emit("joinRoom", message.key);
-  // }
 }
 
 function destroy(message) {
@@ -130,6 +66,20 @@ function destroy(message) {
   });
 }
 
+// Helper functions
+
+function responseHandler(message, key, data, eventSuccessful = true) {
+
+  console.log('responseHandler ran');
+
+  chrome.runtime.sendMessage(Object.assign(message, { data: data }));
+  if (eventSuccessful) {
+    updateInfo({ page: "connected", key: key });
+
+    videoSync = sync(socket);
+  }
+}
+
 // Event listeners
 
 function onMessage(event) {
@@ -138,7 +88,8 @@ function onMessage(event) {
 
   console.log("message recieved");
 
-  rejectErrors(() => functionMap[message.response](message));
+  // rejectErrors(() => functionMap[message.response](message));
+  functionMap[message.response](message);
 }
 
 // Binds all event listeners
