@@ -1,62 +1,148 @@
-import * as m from "./modules/messages";
+import { io } from "socket.io-client";
+import { server } from "./modules/messages";
 import { rejectErrors } from "./modules/utility";
-import { registerUser, sync } from "./modules/socket";
+import { sync } from "./modules/video";
+import { removeInfo, updateInfo, getInfo } from "./modules/injected";
 
-let port = chrome.runtime.connect(m.connectInfo);
-let socket;
+const url = "https://serve.visync.repl.co";
+const tabId = getInfo.apply({}, [, false]).tabId;
 
-//
+console.log(`tabId`);
+console.log(tabId);
 
-async function portMessageHandler(message) {
-  let caseTriggered = true;
-
-  switch (message.request) {
-    case m.server.registerUser.request:
-      // socket = new WebSocket(`wss://${m.servers[1]}.glitch.me/`);
-      let newData;
-
-      [socket, newData] = await registerUser(message.data);
+const channelName = `visync-${tabId}`;
 
 
-      console.log(`inside switch:`);
-      console.log(socket);
+let channel = new BroadcastChannel(channelName);
+let videoSync;
 
-      console.log("second entry");
-      console.log(newData);
 
-      if (newData.data !== m.server.events.error) {
-        sync(socket);
-      }
+console.log(channelName);
 
-      message.data = newData;
-      break;
+let socket = io(url);
 
-    case m.server.destroy.request:
-      //
-      window.removeEventListener("message", windowMessageHandler);
-      console.log("destroy event triggered");
-      break;
-    default:
-      console.log("case not triggered, the following is the message:");
-      console.log(message);
-      caseTriggered = false;
-  }
+const functionMap = {
+  [server.createRoom.response]: createRoom,
+  [server.joinRoom.response]: joinRoom,
+  [server.destroy.response]: destroy,
+};
 
-  if (caseTriggered) {
-    rejectErrors(() => port.postMessage(message));
-  }
+// Response functions
+
+function createRoomSuccess(message) {
+  chrome.runtime.sendMessage(Object.assign(message, { data: socket.id }));
+
+  updateInfo({ page: "connected", key: socket.id });
+
+  console.log(`socket connected: ${socket.connected}`);
+
+  console.log(" videoSync about to run");
+
+  videoSync = sync(socket);
 }
 
-let windowMessageHandler = (m) => portMessageHandler(m.data)
+function createRoom(message) {
+  // console.log(socket._callbacks);
+  // console.log(socket._callbacks["$joinRoom"]);
 
+  // socket.removeAllListeners("joinRoom");
+  // console.log(socket._callbacks['$joinRoom']);
 
-window.addEventListener("message", (m) => {
-  console.log("hello, from content");
-  console.log(m);
-});
+  if (socket.connected) {
+
+    createRoomSuccess(message);
+  } else {
+    socket.on("connect", () => createRoomSuccess(message));
+  }
+
+  // socket.on("connect", () => {
+  //   chrome.runtime.sendMessage(Object.assign(message, { data: socket.id }));
+
+  //   updateInfo({ page: "connected", key: socket.id });
+
+  //   console.log(`socket connected: ${socket.connected}`);
+
+  //   console.log(" videoSync about to run");
+
+  //   videoSync = sync(socket);
+  // });
+
+  // socket.on("disconnect", destroy);
+}
+
+function joinRoom(message) {
+  console.log(message);
+
+  socket.removeAllListeners("joinRoom");
+
+  // Resets handler for new message obj
+  socket.on("joinRoom", (result) => {
+    console.log("joinRoom recieved");
+    console.log(message.key);
+    console.log(result);
+
+    chrome.runtime.sendMessage(Object.assign(message, { data: result }));
+    if (result) {
+      updateInfo({ page: "connected", key: message.key });
+
+      videoSync = sync(socket);
+    }
+  });
+
+  if (socket.connected) {
+    socket.emit("joinRoom", message.key);
+  } else {
+    socket.on("connect", () => socket.emit("joinRoom", message.key));
+  }
+
+  // if (socket == undefined) {
+  //   console.log("socket undefined ran");
+
+  //   socket = io(url);
+
+  //   socket.on("connect", () => socket.emit("joinRoom", message.key));
+  //   socket.on("joinRoom", (result) => {
+  //     console.log("joinRoom recieved");
+  //     console.log(result);
+  //     chrome.runtime.sendMessage(Object.assign(message, { data: result }));
+  //     if (result) {
+  //       updateInfo({ page: "connected", key: message.key });
+
+  //       videoSync = sync(socket);
+  //     }
+  //   });
+  //   socket.on("disconnect", destroy);
+  // } else {
+  //   socket.emit("joinRoom", message.key);
+  // }
+}
+
+function destroy(message) {
+  console.log("destroy ran");
+
+  rejectErrors(() => {
+    if (message.response != undefined) {
+      removeInfo();
+      channel.close();
+    }
+    socket.close();
+    videoSync.destroy();
+  });
+}
 
 // Event listeners
-port.onMessage.addListener(portMessageHandler);
-window.addEventListener("message", windowMessageHandler);
 
-console.log("done");
+function onMessage(event) {
+  let message = event.data;
+  delete message.request;
+
+  console.log("message recieved");
+
+  rejectErrors(() => functionMap[message.response](message));
+}
+
+// Binds all event listeners
+channel.onmessage = onMessage;
+// socket.on('joinRoom', joinRoomHandler);
+
+console.log("injected content");

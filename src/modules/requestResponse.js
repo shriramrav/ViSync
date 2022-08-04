@@ -1,11 +1,11 @@
-import { injectFunc } from "./utility";
-
 function requestResponseSendMessage(message) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message);
 
     const listener = (event) => {
       if (event.response === message.response) {
+        console.log("request response ran");
+
         chrome.runtime.onMessage.removeListener(listener);
         resolve(event.data);
       }
@@ -15,30 +15,4 @@ function requestResponseSendMessage(message) {
   });
 }
 
-function requestResponsePort(port, message) {
-  return new Promise((resolve) => {
-    port.postMessage(message);
-
-    const listener = (event) => {
-      if (event.response === message.response) {
-        port.onMessage.removeListener(listener);
-        resolve(event.data);
-      }
-    };
-
-    port.onMessage.addListener(listener);
-  });
-}
-
-function requestResponseInjectFunc(tabId, func, message) {
-  return new Promise((resolve) => {
-    requestResponseSendMessage(message).then(resolve);
-    injectFunc(tabId, func, message);
-  });
-}
-
-export {
-  requestResponseSendMessage,
-  requestResponsePort,
-  requestResponseInjectFunc,
-};
+export { requestResponseSendMessage };

@@ -1,54 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router";
-import { popupRegisterUser } from "../modules/popupRegisterUser";
+import { requestResponseSendMessage } from "../modules/requestResponse";
+import { addLoadingAnimation, addErrorAnimation } from "./Button";
+import { server } from "../modules/messages";
 import Input from "./Input";
 
 function Join(props) {
   const [buttonAddClass, setButtonAddClass] = useState("");
   const [buttonText, setButtonText] = useState("Join");
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
-  let navigate = useNavigate(); 
+  const textHandler = (text) => setButtonText(text);
+  const addClassHandler = (addClass) => setButtonAddClass(addClass);
+
+  let navigate = useNavigate();
 
   const clickHandler = (e) => {
-    let button = document.querySelector("button");
+    setButtonDisabled(true);
 
-    let setStates = (addClass, text) => {
-      setButtonAddClass(addClass);
-      setButtonText(text);
-    };
+    addLoadingAnimation(textHandler, addClassHandler);
 
-    button.disabled = true;
+    let input = document.querySelector("input");
 
-    setStates(
-      "loading-anim",
-      "Loading..."
-        .split("")
-        .map((char, index) => <span key={index}>{char}</span>)
-    );
+    requestResponseSendMessage(
+      Object.assign({ key: input.value }, server.joinRoom)
+    ).then((result) => {
+      console.log("result::::");
+      console.log(result);
 
-    popupRegisterUser("join", document.querySelector("input").value)
-      .then((result) => {
-        console.log("result");
-        console.log(result);
-        props.keyHandler(result.key);
-        navigate("../create");
-      })
-      .catch((e) => {
+      if (result) {
+        props.keyHandler(input.value);
+        navigate("../connected");
+      } else {
+        addErrorAnimation(
+          { errorText: "Invalid key", defaultText: "Join" },
+          textHandler,
+          addClassHandler
+        );
 
-        console.log('error has occured');
-        console.log(e);
+        setButtonDisabled(false);
+      }
+    });
 
-        setStates("error", "Invalid key");
-        setTimeout(() => setStates("", "Join"), 500);
-
-        button.disabled = false;
-      });
+    console.log("loading");
   };
 
   let buttonProps = {
     text: buttonText,
     addClass: buttonAddClass,
     onClick: clickHandler,
+    disabled: buttonDisabled,
   };
 
   let inputProps = { onClick: () => {}, style: { caretColor: "auto" } };

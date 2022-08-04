@@ -21,9 +21,7 @@
     "start": "react-scripts start",
     "webpack:react": "webpack --config webpack.react.config.js",
     "webpack:sw": "webpack --config webpack.sw.config.js",
-    "webpack:content": "webpack --config webpack.content.config.js",
-    "t:sw": "webpack --config webpack.sw.test.config.js",
-    "t:c": "webpack --config webpack.content.test.config.js"
+    "webpack:content": "webpack --config webpack.content.config.js"
   },
   "eslintConfig": {
     "env": {

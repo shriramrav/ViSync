@@ -3,46 +3,24 @@ const getExtensionInfo = {
   response: "AvKegfDKB0",
 };
 
-const checkForVideoPlayer = {
-  request: "vRPriIQaKL",
-  response: "ALSRIUcbWS",
-};
-
-const injectContentIfNeeded = {
-  request: "pkKWEFkEuL",
-  response: "bSLudtDQAM",
+const injectContent = {
+  request: "pdPBQD4IZb",
+  response: "CWZcam8tpD",
 };
 
 const server = {
-  registerUser: {
+  createRoom: {
     request: "tIVSkVefJp",
     response: "XXBBqabYOL",
   },
-  sync: {
-    status: "aflZjFaurJ",
-    runScript: "PuHyziODac",
+  joinRoom: {
+    request: "WSgIRSmc05",
+    response: "ewwRzm7c1B",
   },
   destroy: {
-    status: "rKJCNCTLqK",
-    runScript: "kewmYRJhAn",
-  },
-  events: {
-    // Must match registered server events
-    connect: "connect",
-    registerUser: "registerUser",
-    error: "error",
+    request: "rKJCNCTLqK",
+    response: "kewmYRJhAn",
   },
 };
 
-const servers = ["visync", "visync-dev"];
-
-const connectInfo = { name: "visync" };
-
-export {
-  checkForVideoPlayer,
-  server,
-  servers,
-  connectInfo,
-  injectContentIfNeeded,
-  getExtensionInfo
-};
+export { server, getExtensionInfo, injectContent };

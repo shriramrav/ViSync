@@ -1,128 +1,71 @@
 import * as m from "./modules/messages";
-import { injectFile, getActiveTabId, injectFunc } from "./modules/utility";
-import {
-  requestResponsePort,
-  requestResponseInjectFunc,
-} from "./modules/requestResponse";
-import checkForVideoPlayer from "./modules/checkForVideoPlayer";
-import { generateRandomKey } from "./modules/keys";
-import windowPostMessage from "./modules/windowPostMessage";
-import getExtensionInfo from "./modules/getExtensionInfo";
+import { rejectErrors } from "./modules/utility";
+import { injectFile, getActiveTab, injectFunc } from "./modules/swHelpers";
+import * as ext from "./modules/injected";
 
-let extensionInfo = {};
-let activeExtensionTab = null;
-let ports = {};
+let currentTab;
+
+const functionMap = {
+  [m.getExtensionInfo.response]: getExtensionInfo,
+  [m.server.createRoom.response]: bcPostMessage,
+  [m.server.joinRoom.response]: bcPostMessage,
+  [m.server.destroy.response]: destroy,
+  [m.injectContent.response]: injectContent,
+};
+
+// Response functions
+
+function getExtensionInfo(message) {
+  console.log(currentTab.url);
+  console.log(currentTab.url.includes("https://"));
+
+  const { url, id } = currentTab;
+
+  if (url.includes("https://")) {
+    injectFunc(id, ext.getInfo, Object.assign(message, { tabId: id }));
+  } else {
+    chrome.runtime.sendMessage(
+      // Default page
+      Object.assign(message, { data: { page: "failure" } })
+    );
+  }
+}
+
+function bcPostMessage(message) {
+  const { id } = currentTab;
+
+  injectFunc(id, ext.postMessage, message, id);
+}
+
+function injectContent() {
+  injectFile(currentTab.id, "content.js");
+}
+
+function destroy(message) {
+  console.log("recieved server destroy message");
+
+  injectFunc(currentTab.id, ext.removeInfo);
+  bcPostMessage(message);
+}
 
 // Event listener functions
 
-function resetTab(tabId) {
-  if (activeExtensionTab === tabId) {
-    activeExtensionTab = null;
-  }
-  delete extensionInfo[tabId];
-  delete ports[tabId];
-}
+async function onMessage(message) {
+  if (message.request != undefined) {
+    currentTab = await getActiveTab();
 
-// Change function name later
-async function initializeTab(tabId) {
-  return new Promise((resolve) => {
-    if (extensionInfo[tabId] === undefined) {
-      // Message for checking if video player exists
-      let message = {
-        request: generateRandomKey(),
-        response: generateRandomKey(),
-      };
+    delete message.request;
 
-      let data = {
-        page: "failure",
-        key: "",
-      };
+    console.log(message);
+    console.log(currentTab);
 
-      requestResponseInjectFunc(tabId, checkForVideoPlayer, message).then(
-        (result) => {
-          if (result) {
-            data.page = "main";
-
-            // Check if this saves time while opening popup
-            injectFile(tabId, "content.js");
-          }
-          resolve();
-        }
-      );
-
-      extensionInfo[tabId] = data;
-    } else {
-      resolve();
-    }
-
-    // Add check for if another tab already has room created
-  });
-}
-
-async function onConnectEventListener(port) {
-
-  // Could add listeners for current tab later
-  ports[await getActiveTabId()] = port;
-}
-
-async function onMessageEventListener(message) {
-  let tabId = await getActiveTabId();
-  let shouldSendMessage = true;
-
-  switch (message.request) {
-    case m.getExtensionInfo.request:
-      // Test
-      // await initializeTab(tabId);
-
-      console.log("initalizeTab finished");
-
-      message.data = extensionInfo[tabId];
-
-
-      injectFunc(tabId, getExtensionInfo, message);
-
-
-
-      shouldSendMessage = false;
-      break;
-    case m.server.registerUser.request:
-      let result = await requestResponsePort(ports[tabId], message);
-
-
-      if (result.data !== m.server.events.error) {
-        // 
-        extensionInfo[tabId] = result;
-      }
-      console.log("From service worker");
-      console.log(result);
-      console.log(m.server.events.error);
-
-
-      // 
-      message.data = result;
-
-      break;
-    case m.server.destroy.request:
-      await injectFunc(tabId, windowPostMessage, message);
-      delete extensionInfo[tabId];
-
-    default:
-      shouldSendMessage = false;
-  }
-
-  if (shouldSendMessage) {
-    // CAUTION: make sure for no infinite message sending
-    chrome.runtime.sendMessage(message);
+    rejectErrors(() => functionMap[message.response](message));
   }
 }
 
-// Binds all event listeners
-chrome.tabs.onUpdated.addListener(resetTab);
-chrome.tabs.onRemoved.addListener(resetTab);
+// check for url
 
-chrome.runtime.onConnect.addListener(onConnectEventListener);
-chrome.runtime.onMessage.addListener(onMessageEventListener);
-
-// chrome.runtime.onActivated.addListener()
+chrome.runtime.onMessage.addListener(onMessage);
+chrome.tabs.onActivated.addListener((obj) => console.log(obj));
 
 console.log("Service Worker Running");
