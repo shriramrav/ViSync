@@ -5,7 +5,7 @@ import * as ext from "./modules/injected";
 
 let currentTab;
 
-const functionMap = {
+let functionMap = {
   [m.getExtensionInfo.response]: getExtensionInfo,
   [m.server.createRoom.response]: bcPostMessage,
   [m.server.joinRoom.response]: bcPostMessage,
@@ -51,6 +51,9 @@ function destroy(message) {
 // Event listener functions
 
 async function onMessage(message) {
+
+  console.log(message);
+
   if (message.request != undefined) {
     currentTab = await getActiveTab();
 
@@ -63,9 +66,48 @@ async function onMessage(message) {
   }
 }
 
-// check for url
+// New development
+
+Object.assign(functionMap, {
+  [m.injectContentNew.response]: injectContentNew,
+});
+
+function injectContentNew(message) {
+  console.log("injectContentNew ran");
+  injectFile(currentTab.id, "test.js", true);
+}
+
+// chrome.scripting.registerContentScripts({
+//   scripts: ['proxy.js'],
+//   callback: () => console.log('proxy content script registered')
+// });
+
+// chrome.runtime.onActivated()
+
+// Binds event listeners
+
+function initializeProxyIfNeeded(tabId) {
+  injectFunc(tabId, ext.getInfo, { tabId: tabId }, false).then(() => {
+    injectFile(tabId, 'proxy.js');
+  });
+}
 
 chrome.runtime.onMessage.addListener(onMessage);
-chrome.tabs.onActivated.addListener((obj) => console.log(obj));
+chrome.tabs.onActivated.addListener((obj) => {
+
+  const { tabId } = obj;
+
+  initializeProxyIfNeeded(tabId);
+
+});
+chrome.tabs.onUpdated.addListener((tabId, changeinfo, tab) => {
+
+  let url = tab.url;
+
+  if (url !== undefined && changeinfo.status == "complete") {
+    console.log(tabId);
+    initializeProxyIfNeeded(tabId);
+  }
+});
 
 console.log("Service Worker Running");

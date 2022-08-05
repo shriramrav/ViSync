@@ -97,3 +97,4 @@ channel.onmessage = onMessage;
 // socket.on('joinRoom', joinRoomHandler);
 
 console.log("injected content");
+

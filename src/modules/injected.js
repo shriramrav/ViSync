@@ -1,3 +1,5 @@
+// change to __visync_info__ later
+
 const getInfo = (message, sendChromeMessage = true) => {
   let result;
 
@@ -7,6 +9,7 @@ const getInfo = (message, sendChromeMessage = true) => {
     window.viSyncInfo = {
       page: document.querySelector("video") !== null ? "main" : "failure",
       tabId: message.tabId,
+      proxyIsInitialized: false,
     };
 
     result = Object.assign({ initialized: true }, viSyncInfo);
@@ -25,12 +28,30 @@ const getInfo = (message, sendChromeMessage = true) => {
 };
 
 const removeInfo = () => {
-  console.log('info is being disconnected');
-  delete window.viSyncInfo;};
+  console.log("info is being disconnected");
+  delete window.viSyncInfo;
+};
+
+const isInitialized = () => {
+  return window.viSyncInfo !== undefined;
+};
+
+const proxyIsInitialized = () => {
+  return window.viSyncInfo.proxyIsInitialized;
+};
 
 const updateInfo = (obj) => Object.assign(window.viSyncInfo, obj);
+
+// const setInfo(obj) => window.viSyncInfo
 
 const postMessage = (message, tabId) =>
   new BroadcastChannel(`visync-${tabId}`).postMessage(message);
 
-export { getInfo, removeInfo, updateInfo, postMessage };
+export {
+  getInfo,
+  removeInfo,
+  updateInfo,
+  postMessage,
+  isInitialized,
+  proxyIsInitialized,
+};
