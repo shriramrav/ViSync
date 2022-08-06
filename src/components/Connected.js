@@ -14,6 +14,9 @@ function Connected(props) {
 
           console.log('clicked');
 
+          let message = server.destroy;
+          
+          message.tabId = props.tabId;
 
           chrome.runtime.sendMessage(server.destroy, () => {
             // console.log('operation complete');

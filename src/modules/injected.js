@@ -40,7 +40,14 @@ const proxyIsInitialized = () => {
   return window.viSyncInfo.proxyIsInitialized;
 };
 
-const updateInfo = (obj) => Object.assign(window.viSyncInfo, obj);
+const updateInfo = (obj) => {
+
+  console.log('info is being updated');
+  console.log(window.viSyncInfo);
+  Object.assign(window.viSyncInfo, obj)
+  
+  
+};
 
 // const setInfo(obj) => window.viSyncInfo
 

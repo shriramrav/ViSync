@@ -1,5 +1,5 @@
 import { getInfo, proxyIsInitialized, updateInfo } from "./modules/injected";
-import { proxy, injectContentNew } from "./modules/messages";
+import { proxy, injectContent, server } from "./modules/messages";
 import { runAfterLoad } from "./modules/contentHelpers";
 import { getIframeFromSrc } from "./modules/proxyHelpers";
 
@@ -12,6 +12,10 @@ let channel;
 
 const functionMap = {
   [proxy.bindSource.response]: bindSource,
+  [proxy.updateExtInfo.response]: updateExtInfo,
+  [server.createRoom.response]: sendMessageToSource,
+  [server.joinRoom.response]: sendMessageToSource,
+  [server.destroy.response]: () => {},
 };
 
 console.log("proxy injected");
@@ -25,7 +29,7 @@ function init() {
   document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
 
   getInfo({ proxyIsInitialized: true }, false);
-  chrome.runtime.sendMessage(injectContentNew);
+  chrome.runtime.sendMessage(injectContent);
 }
 
 // Response functions
@@ -47,28 +51,40 @@ function bindSource(message) {
   console.log(sources);
 }
 
+function sendMessageToSource(message) {
+  console.log("sendMessageToSource started");
+
+  sources[0].messagingWindow.postMessage(message, "*");
+}
+
+function updateExtInfo(message) {
+  updateInfo(message.newInfo);
+}
+
 // Event listeners
 
-function onDOMNodeInserted(e) {
-  let { target } = e;
+function onDOMNodeInserted(event) {
+  let { target } = event;
 
   const reinjectNodes = ["IFRAME"];
 
   if (reinjectNodes.includes(target.nodeName)) {
     target.onload = function () {
-      chrome.runtime.sendMessage(injectContentNew);
+      chrome.runtime.sendMessage(injectContent);
     };
   }
 }
 
 function onMessage(event) {
   let message = event.data;
-  if (message.request !== undefined) {
-    delete message.request;
 
-    console.log("message recieved");
+  console.log("message recieved");
+  console.log(message);
 
-    // rejectErrors(() => functionMap[message.response](message));
+  if (message.from === "sw" || message.from === "content") {
+
+    message.from = "proxy";
+
     functionMap[message.response](message);
   }
 }

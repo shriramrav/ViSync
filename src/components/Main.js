@@ -3,7 +3,6 @@ import Button, { addLoadingAnimation } from "./Button";
 import Page from "./Page";
 import { useNavigate } from "react-router-dom";
 import { requestResponseSendMessage } from "../modules/requestResponse";
-// import { popupRegisterUser } from "../modules/popupRegisterUser";
 import { server } from "../modules/messages";
 
 function Main(props) {
@@ -20,7 +19,11 @@ function Main(props) {
     setButtonsAreDisabled(true);
     addLoadingAnimation(textHandler, addClassHandler);
 
-    requestResponseSendMessage(server.createRoom).then((result) => {
+    let message = server.createRoom;
+    
+    message.tabId = props.tabId;
+
+    requestResponseSendMessage(message).then((result) => {
       console.log(result);
       props.keyHandler(result);
       navigate("../connected");

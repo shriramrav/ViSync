@@ -1,5 +1,4 @@
 import * as m from "./modules/messages";
-import { rejectErrors } from "./modules/utility";
 import { injectFile, getActiveTab, injectFunc } from "./modules/swHelpers";
 import * as ext from "./modules/injected";
 
@@ -16,18 +15,18 @@ let functionMap = {
 // Response functions
 
 function getExtensionInfo(message) {
-  console.log(currentTab.url);
-  console.log(currentTab.url.includes("https://"));
-
   const { url, id } = currentTab;
 
   if (url.includes("https://")) {
-    injectFunc(id, ext.getInfo, Object.assign(message, { tabId: id }));
+    message.tabId = id;
+
+    injectFunc(id, ext.getInfo, message);
   } else {
-    chrome.runtime.sendMessage(
-      // Default page
-      Object.assign(message, { data: { page: "failure" } })
-    );
+    message.data = {
+      page: "failure",
+    };
+
+    chrome.runtime.sendMessage(message);
   }
 }
 
@@ -37,77 +36,66 @@ function bcPostMessage(message) {
   injectFunc(id, ext.postMessage, message, id);
 }
 
-function injectContent() {
-  injectFile(currentTab.id, "content.js");
+function injectContent(message) {
+  injectFile(currentTab.id, "content.js", true);
 }
 
 function destroy(message) {
   console.log("recieved server destroy message");
-
-  injectFunc(currentTab.id, ext.removeInfo);
-  bcPostMessage(message);
 }
-
-// Event listener functions
-
-async function onMessage(message) {
-
-  console.log(message);
-
-  if (message.request != undefined) {
-    currentTab = await getActiveTab();
-
-    delete message.request;
-
-    console.log(message);
-    console.log(currentTab);
-
-    rejectErrors(() => functionMap[message.response](message));
-  }
-}
-
-// New development
-
-Object.assign(functionMap, {
-  [m.injectContentNew.response]: injectContentNew,
-});
-
-function injectContentNew(message) {
-  console.log("injectContentNew ran");
-  injectFile(currentTab.id, "test.js", true);
-}
-
-// chrome.scripting.registerContentScripts({
-//   scripts: ['proxy.js'],
-//   callback: () => console.log('proxy content script registered')
-// });
-
-// chrome.runtime.onActivated()
 
 // Binds event listeners
 
 function initializeProxyIfNeeded(tabId) {
   injectFunc(tabId, ext.getInfo, { tabId: tabId }, false).then(() => {
-    injectFile(tabId, 'proxy.js');
+    injectFile(tabId, "proxy.js");
   });
 }
 
-chrome.runtime.onMessage.addListener(onMessage);
-chrome.tabs.onActivated.addListener((obj) => {
+// Event listener functions
 
-  const { tabId } = obj;
+async function onMessage(message) {
+  if (message.request != undefined) {
+    // Change to get tabdata from message later
+    currentTab = await getActiveTab();
 
+    delete message.request;
+
+
+    message.from = "sw";
+
+    functionMap[message.response](message);
+  }
+}
+
+function onActivated(tabObj) {
+  const { tabId } = tabObj;
   initializeProxyIfNeeded(tabId);
+}
 
-});
-chrome.tabs.onUpdated.addListener((tabId, changeinfo, tab) => {
-
-  let url = tab.url;
-
-  if (url !== undefined && changeinfo.status == "complete") {
-    console.log(tabId);
+function onUpdated(tabId, docInfo, tab) {
+  const { url } = tab;
+  if (url !== undefined && docInfo.status == "complete") {
     initializeProxyIfNeeded(tabId);
   }
-});
+}
+
+// Binds event listeners
+
+chrome.runtime.onMessage.addListener(onMessage);
+chrome.tabs.onActivated.addListener(onActivated);
+chrome.tabs.onUpdated.addListener(onUpdated);
 
 console.log("Service Worker Running");
+
+// TODO
+
+// make sure tabIds that are being used are from what was originally binded
+
+// add destroyer and make sure to reset with url change
+
+// rename to proxy and content helpers to document helpers documentHelpers
+
+// fix variable names through proxy and content, and service worker
+
+// for global variables, change to __x__ style name

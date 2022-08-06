@@ -22,9 +22,13 @@ function Join(props) {
 
     let input = document.querySelector("input");
 
-    requestResponseSendMessage(
-      Object.assign({ key: input.value }, server.joinRoom)
-    ).then((result) => {
+    let message = server.joinRoom;
+
+    // 
+    message.key = input.value;
+    message.tabId = props.tabId;
+
+    requestResponseSendMessage(message).then((result) => {
       console.log("result::::");
       console.log(result);
 

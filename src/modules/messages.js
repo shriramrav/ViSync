@@ -37,10 +37,12 @@ const proxy = {
     request: "am3oPz4rbd",
     response: "AJccKnRmFb",
   },
+  updateExtInfo: {
+    request: "wljND7sgav",
+    response: "SDL1Ik0p0P",
+  },
 };
 
-// wljND7sgav
-// SDL1Ik0p0P
 // BZ06iCFNGf
 // XpmyNvCv4A
 // qQcg2ILvdM

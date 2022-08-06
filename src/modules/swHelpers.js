@@ -10,29 +10,23 @@ function getActiveTab() {
   });
 }
 
-function inject(tab, options, allFrames=false) {
+function inject(tabId, options, allFrames = false) {
+  options.target = {
+    tabId: tabId,
+    allFrames: allFrames,
+  };
+
   return new Promise((resolve) =>
-    chrome.scripting.executeScript(
-      Object.assign(
-        {
-          target: {
-            tabId: tab,
-            allFrames: allFrames
-          },
-        },
-        options
-      ),
-      resolve
-    )
+    chrome.scripting.executeScript(options, resolve)
   );
 }
 
-function injectFunc(tab, func, ...args) {
-  return inject(tab, { func: func, args: args });
+function injectFunc(tabId, func, ...args) {
+  return inject(tabId, { func: func, args: args });
 }
 
-function injectFile(tab, file, allFrames=false) {
-  return inject(tab, { files: [file] }, allFrames);
+function injectFile(tabId, file, allFrames = false) {
+  return inject(tabId, { files: [file] }, allFrames);
 }
 
 export { getActiveTab, injectFile, injectFunc };
