@@ -5,7 +5,7 @@ import { getIframeFromSrc } from "./modules/proxyHelpers";
 
 let sources = [];
 
-const tabId = getInfo.apply({}, [, false]).tabId;
+const tabId = getInfo({}, false).tabId;
 const channelName = `visync-${tabId}`;
 
 let channel;
@@ -28,7 +28,12 @@ function init() {
   window.addEventListener("message", onMessage);
   document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
 
-  getInfo({ proxyIsInitialized: true }, false);
+  updateInfo({ proxyIsInitialized: true });
+
+  let message = injectContent;
+   
+  message.tabId = tabId;
+
   chrome.runtime.sendMessage(injectContent);
 }
 
@@ -70,6 +75,13 @@ function onDOMNodeInserted(event) {
 
   if (reinjectNodes.includes(target.nodeName)) {
     target.onload = function () {
+      let message = injectContent;
+
+      message.tabId = tabId;
+
+      console.log('inside proxy: '); 
+      console.log(message.tabId);
+
       chrome.runtime.sendMessage(injectContent);
     };
   }
@@ -82,7 +94,6 @@ function onMessage(event) {
   console.log(message);
 
   if (message.from === "sw" || message.from === "content") {
-
     message.from = "proxy";
 
     functionMap[message.response](message);
