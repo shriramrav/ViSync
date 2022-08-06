@@ -14,13 +14,16 @@ let functionMap = {
 
 // Response functions
 
-function getExtensionInfo(message) {
-  const { url, id } = currentTab;
+async function getExtensionInfo(message) {
+  message.tabId = currentTab.id;
 
-  if (url.includes("https://")) {
-    message.tabId = id;
+  console.log("inside getExtensionInfo");
+  console.log(message.tabId);
 
-    injectFunc(id, ext.getInfo, message);
+  const tab = await chrome.tabs.get(message.tabId);
+
+  if (tab.url.includes("https://")) {
+    injectFunc(message.tabId, ext.getInfo, message);
   } else {
     message.data = {
       page: "failure",
@@ -31,20 +34,18 @@ function getExtensionInfo(message) {
 }
 
 function bcPostMessage(message) {
-  const { id } = currentTab;
-
-  injectFunc(id, ext.postMessage, message, id);
+  injectFunc(message.tabId, ext.postMessage, message, message.tabId);
 }
 
 function injectContent(message) {
-  injectFile(currentTab.id, "content.js", true);
+  injectFile(message.tabId, "content.js", true);
 }
 
 function destroy(message) {
   console.log("recieved server destroy message");
 }
 
-// Binds event listeners
+// Helper functions
 
 function initializeProxyIfNeeded(tabId) {
   injectFunc(tabId, ext.getInfo, { tabId: tabId }, false).then(() => {
@@ -60,7 +61,6 @@ async function onMessage(message) {
     currentTab = await getActiveTab();
 
     delete message.request;
-
 
     message.from = "sw";
 
@@ -90,7 +90,7 @@ console.log("Service Worker Running");
 
 // TODO
 
-// make sure tabIds that are being used are from what was originally binded
+// change checks in listeners
 
 // add destroyer and make sure to reset with url change
 
