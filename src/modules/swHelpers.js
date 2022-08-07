@@ -1,12 +1,11 @@
 function getActiveTab() {
+  const options = {
+    active: true,
+    lastFocusedWindow: true,
+  };
+
   return new Promise((resolve) => {
-    chrome.tabs.query(
-      {
-        active: true,
-        lastFocusedWindow: true,
-      },
-      (tabs) => resolve(tabs[0])
-    );
+    chrome.tabs.query(options, (tabs) => resolve(tabs[0]));
   });
 }
 

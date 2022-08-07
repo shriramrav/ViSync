@@ -1,4 +1,4 @@
-function runAfterLoad(fn) {
+function runAfterDocumentLoad(fn) {
   const delay = 50;
   const readyState = "complete";
 
@@ -15,4 +15,14 @@ function isIframe(currentWindow) {
   return currentWindow !== window.top;
 }
 
-export { runAfterLoad, isIframe };
+function getIframeFromSrc(src) {
+  const iframes = document.querySelectorAll("iframe");
+
+  for (let i = 0; i < iframes.length; i++) {
+    if (iframes[i].src === src) {
+      return iframes[i];
+    }
+  }
+}
+
+export { getIframeFromSrc, runAfterDocumentLoad, isIframe };

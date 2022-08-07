@@ -8,7 +8,7 @@ const injectContent = {
   response: "CWZcam8tpD",
 };
 
-const injectContentNew = {
+const initializeProxyIfNeeded = {
   request: "3UFyR9QgWh",
   response: "YTN47Xb2Bf",
 };
@@ -48,4 +48,10 @@ const proxy = {
 // qQcg2ILvdM
 // 3UZoQspj5i
 
-export { server, getExtensionInfo, injectContent, injectContentNew, proxy };
+export {
+  server,
+  getExtensionInfo,
+  injectContent,
+  initializeProxyIfNeeded,
+  proxy,
+};

@@ -2,8 +2,7 @@ import { io } from "socket.io-client";
 import { proxy, server } from "./modules/messages";
 import { rejectErrors } from "./modules/utility";
 import { sync } from "./modules/video";
-// import { removeInfo, updateInfo } from "./modules/injected";
-import { isIframe, runAfterLoad } from "./modules/contentHelpers";
+import { isIframe, runAfterDocumentLoad } from "./modules/documentHelpers";
 
 const functionMap = {
   [server.createRoom.response]: createRoom,
@@ -24,7 +23,7 @@ function init() {
     document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
   }
 
-  window.injectedContent = true;
+  window.__injected__content__ = true;
 }
 
 // Response functions
@@ -48,10 +47,6 @@ function createRoom(message) {
 }
 
 function joinRoom(message) {
-  // if (!socket) socket = io(url);
-
-  const { key } = message;
-
   if (socket === undefined) {
     socket = io(url);
   }
@@ -61,7 +56,7 @@ function joinRoom(message) {
   }
 
   socket.on("joinRoom", (result) => {
-    responseHandler(message, key, result, result);
+    responseHandler(message, message.key, result, result);
   });
 
   if (socket.connected) {
@@ -71,17 +66,16 @@ function joinRoom(message) {
   }
 }
 
-function destroy(message) {
+function destroy() {
   console.log("destroy ran");
 
-  rejectErrors(() => {
-    // if (message.response != undefined) {
-    //   removeInfo();
-    //   channel.close();
-    // }
-    // socket.close();
-    // videoSync.destroy();
-  });
+  window.removeEventListener("message", onMessage);
+  document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
+  
+  delete window.__injected__content__;
+  
+  socket.close();
+  videoSync.destroy();
 }
 
 // Helper functions
@@ -127,10 +121,8 @@ function setUpSource() {
 
 // Event listners;
 
-function onDOMNodeInserted(e) {
-  const { target } = e;
-
-  if (target.nodeName === "VIDEO") {
+function onDOMNodeInserted(event) {
+  if (event.target.nodeName === "VIDEO") {
     setUpSource();
     document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
   }
@@ -147,9 +139,13 @@ function onMessage(event) {
   }
 }
 
-// Can change to just if statement later
-runAfterLoad(() => {
-  if (!window.injectedContent) {
+runAfterDocumentLoad(() => {
+
+  console.log('content script injected');
+  console.log(window.location.href);
+  console.log('injected')
+
+  if (!window.__injected__content__) {
     init();
   }
 });

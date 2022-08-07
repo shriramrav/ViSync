@@ -1,6 +1,6 @@
 import * as m from "./modules/messages";
 import { injectFile, getActiveTab, injectFunc } from "./modules/swHelpers";
-import * as ext from "./modules/injected";
+import * as ext from "./modules/extension";
 
 let currentTab;
 
@@ -8,8 +8,9 @@ let functionMap = {
   [m.getExtensionInfo.response]: getExtensionInfo,
   [m.server.createRoom.response]: bcPostMessage,
   [m.server.joinRoom.response]: bcPostMessage,
-  [m.server.destroy.response]: destroy,
+  [m.server.destroy.response]: bcPostMessage,
   [m.injectContent.response]: injectContent,
+  [m.initializeProxyIfNeeded.response]: initializeProxyIfNeeded,
 };
 
 // Response functions
@@ -41,17 +42,18 @@ function injectContent(message) {
   injectFile(message.tabId, "content.js", true);
 }
 
-function destroy(message) {
-  console.log("recieved server destroy message");
-}
+function initializeProxyIfNeeded(message) {
 
-// Helper functions
+  console.log('initalizeProxy if needed ran');
 
-function initializeProxyIfNeeded(tabId) {
+  let tabId = message.tabId;
+
   injectFunc(tabId, ext.getInfo, { tabId: tabId }, false).then(() => {
     injectFile(tabId, "proxy.js");
   });
 }
+
+// Helper functions
 
 // Event listener functions
 
@@ -68,15 +70,13 @@ async function onMessage(message) {
   }
 }
 
-function onActivated(tabObj) {
-  const { tabId } = tabObj;
-  initializeProxyIfNeeded(tabId);
+function onActivated(tabInfo) {
+  initializeProxyIfNeeded(tabInfo);
 }
 
 function onUpdated(tabId, docInfo, tab) {
-  const { url } = tab;
-  if (url !== undefined && docInfo.status == "complete") {
-    initializeProxyIfNeeded(tabId);
+  if (tab.url !== undefined && docInfo.status == "complete") {
+    initializeProxyIfNeeded({ tabId: tabId });
   }
 }
 
@@ -90,12 +90,8 @@ console.log("Service Worker Running");
 
 // TODO
 
-// change checks in listeners
+// make destroy run on url change 
 
-// add destroyer and make sure to reset with url change
+// connect socket when popup loads
 
-// rename to proxy and content helpers to document helpers documentHelpers
 
-// fix variable names through proxy and content, and service worker
-
-// for global variables, change to __x__ style name
