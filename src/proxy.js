@@ -1,7 +1,9 @@
-import { getInfo, proxyIsInitialized, updateInfo } from "./modules/injected";
-import { proxy, injectContent, server } from "./modules/messages";
-import { runAfterLoad } from "./modules/contentHelpers";
-import { getIframeFromSrc } from "./modules/proxyHelpers";
+import { getInfo, proxyIsInitialized, updateInfo, removeInfo } from "./modules/extension";
+import { proxy, injectContent, initializeProxyIfNeeded, server } from "./modules/messages";
+import {
+  getIframeFromSrc,
+  runAfterDocumentLoad,
+} from "./modules/documentHelpers";
 
 let sources = [];
 
@@ -15,10 +17,8 @@ const functionMap = {
   [proxy.updateExtInfo.response]: updateExtInfo,
   [server.createRoom.response]: sendMessageToSource,
   [server.joinRoom.response]: sendMessageToSource,
-  [server.destroy.response]: () => {},
+  [server.destroy.response]: destroy,
 };
-
-console.log("proxy injected");
 
 function init() {
   channel = new BroadcastChannel(channelName);
@@ -31,7 +31,7 @@ function init() {
   updateInfo({ proxyIsInitialized: true });
 
   let message = injectContent;
-   
+
   message.tabId = tabId;
 
   chrome.runtime.sendMessage(injectContent);
@@ -40,14 +40,9 @@ function init() {
 // Response functions
 
 function bindSource(message) {
-  console.log("bindSource: ");
-  console.log(message);
-
-  const { isIframe, origin } = message;
-
   sources.push({
-    messagingWindow: isIframe
-      ? getIframeFromSrc(origin).contentWindow
+    messagingWindow: message.isIframe
+      ? getIframeFromSrc(message.origin).contentWindow
       : window.self,
   });
 
@@ -66,21 +61,31 @@ function updateExtInfo(message) {
   updateInfo(message.newInfo);
 }
 
+function destroy(message) {
+  removeInfo();
+  window.removeEventListener("message", onMessage);
+  document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
+  channel.close();
+  sendMessageToSource(message);
+  
+
+  message = initializeProxyIfNeeded;
+  message.tabId = tabId;
+
+  chrome.runtime.sendMessage(message);
+}
+
+
 // Event listeners
 
 function onDOMNodeInserted(event) {
-  let { target } = event;
-
   const reinjectNodes = ["IFRAME"];
 
-  if (reinjectNodes.includes(target.nodeName)) {
-    target.onload = function () {
+  if (reinjectNodes.includes(event.target.nodeName)) {
+    event.target.onload = function () {
       let message = injectContent;
 
       message.tabId = tabId;
-
-      console.log('inside proxy: '); 
-      console.log(message.tabId);
 
       chrome.runtime.sendMessage(injectContent);
     };
@@ -90,9 +95,6 @@ function onDOMNodeInserted(event) {
 function onMessage(event) {
   let message = event.data;
 
-  console.log("message recieved");
-  console.log(message);
-
   if (message.from === "sw" || message.from === "content") {
     message.from = "proxy";
 
@@ -100,9 +102,13 @@ function onMessage(event) {
   }
 }
 
-// change to runAfterDocumentLoad
-runAfterLoad(() => {
+runAfterDocumentLoad(() => {
   if (!proxyIsInitialized()) {
+
+    console.log('proxy wasnt initialized');
+
     init();
   }
 });
+
+console.log("Proxy Script Running");
