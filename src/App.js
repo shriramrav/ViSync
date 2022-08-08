@@ -7,7 +7,7 @@ import Failure from "./components/Failure";
 import Join from "./components/Join";
 
 import { requestResponseSendMessage } from "./modules/requestResponse";
-import { getExtensionInfo, injectContent } from "./modules/messages";
+import { getExtensionInfo } from "./modules/messages";
 
 function App(props) {
   const [key, setKey] = useState("");
