@@ -26,6 +26,10 @@ const server = {
     request: "WSgIRSmc05",
     response: "ewwRzm7c1B",
   },
+  disconnectIfNeeded: {
+    request: 'XpmyNvCv4A',
+    response: 'qQcg2ILvdM'
+  },
   destroy: {
     request: "rKJCNCTLqK",
     response: "kewmYRJhAn",
@@ -44,8 +48,6 @@ const proxy = {
 };
 
 // BZ06iCFNGf
-// XpmyNvCv4A
-// qQcg2ILvdM
 // 3UZoQspj5i
 
 export {

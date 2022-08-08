@@ -1,13 +1,19 @@
 import * as m from "./modules/messages";
 import { injectFile, getActiveTab, injectFunc } from "./modules/swHelpers";
 import * as ext from "./modules/extension";
+import { generateRandomKey } from "./modules/keys";
 
 let currentTab;
+// let scriptId = generateRandomKey();
+
+let scriptId = "sw";
 
 let functionMap = {
   [m.getExtensionInfo.response]: getExtensionInfo,
   [m.server.createRoom.response]: bcPostMessage,
   [m.server.joinRoom.response]: bcPostMessage,
+  // [m.server.connect.response]: bcPostMessage,
+  // [m.server.disconnectIfNeeded.response]: bcPostMessage,
   [m.server.destroy.response]: bcPostMessage,
   [m.injectContent.response]: injectContent,
   [m.initializeProxyIfNeeded.response]: initializeProxyIfNeeded,
@@ -43,8 +49,7 @@ function injectContent(message) {
 }
 
 function initializeProxyIfNeeded(message) {
-
-  console.log('initalizeProxy if needed ran');
+  console.log("initalizeProxy if needed ran");
 
   let tabId = message.tabId;
 
@@ -58,13 +63,22 @@ function initializeProxyIfNeeded(message) {
 // Event listener functions
 
 async function onMessage(message) {
-  if (message.request != undefined) {
+  if (
+    message.request !== undefined ||
+    (message.scriptId != undefined &&
+      !message.scriptId.includes("content-") &&
+      message.scriptId !== scriptId)
+  ) {
+    console.log("inside sw onmessage::");
+    console.log(message);
+
     // Change to get tabdata from message later
     currentTab = await getActiveTab();
 
     delete message.request;
 
-    message.from = "sw";
+    // Attach script id;
+    message.scriptId = scriptId;
 
     functionMap[message.response](message);
   }
@@ -90,8 +104,6 @@ console.log("Service Worker Running");
 
 // TODO
 
-// make destroy run on url change 
+// make destroy run on url change
 
 // connect socket when popup loads
-
-

@@ -1,151 +1,136 @@
 import { io } from "socket.io-client";
 import { proxy, server } from "./modules/messages";
-import { rejectErrors } from "./modules/utility";
+// import { rejectErrors } from "./modules/utility";
 import { sync } from "./modules/video";
-import { isIframe, runAfterDocumentLoad } from "./modules/documentHelpers";
+import { isIframe, pollForDocumentReadyState } from "./modules/documentHelpers";
+import { getRuntimeMessenger, getMessageEventHandler } from "./modules/getters";
+import { generateRandomKey } from "./modules/keys";
 
 const functionMap = {
-  [server.createRoom.response]: createRoom,
-  [server.joinRoom.response]: joinRoom,
-  [server.destroy.response]: destroy,
+	[server.createRoom.response]: createRoom,
+	[server.joinRoom.response]: joinRoom,
+	[server.destroy.response]: destroy,
 };
-
-const url = "https://serve.visync.repl.co";
 
 let messagingWindow;
 let socket;
 let videoSync;
 
-function init() {
-  if (document.querySelector("video") != null) {
-    setUpSource();
-  } else {
-    document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
-  }
+const scriptId = `content-${generateRandomKey()}`;
+const url = "https://serve.visync.repl.co";
+const sendChromeRuntimeMessage = getRuntimeMessenger(scriptId);
+const onMessage = getMessageEventHandler(scriptId, functionMap);
 
-  window.__injected__content__ = true;
+function init() {
+	if (document.querySelector("video") != null) {
+		setUpSource();
+	} else {
+		document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
+	}
 }
 
 // Response functions
 
 function createRoom(message) {
-  if (socket === undefined) {
-    socket = io(url);
-  }
+	if (socket === undefined) {
+		socket = io(url);
+	}
 
-  if (socket.connected) {
+	if (socket.connected) {
     socket.removeAllListeners("createRoom");
-  }
+		socket.emit("createRoom");
+	} else {
+		socket.on("connect", () => socket.emit("createRoom"));
+	}
 
   socket.on("createRoom", (key) => responseHandler(message, key, key));
-
-  if (socket.connected) {
-    socket.emit("createRoom");
-  } else {
-    socket.on("connect", () => socket.emit("createRoom"));
-  }
 }
 
 function joinRoom(message) {
-  if (socket === undefined) {
-    socket = io(url);
-  }
+	if (socket === undefined) {
+		socket = io(url);
+	}
 
   if (socket.connected) {
     socket.removeAllListeners("joinRoom");
-  }
+		socket.emit("joinRoom", message.key);
+	} else {
+		socket.on("connect", () => socket.emit("joinRoom", message.key));
+	}
 
-  socket.on("joinRoom", (result) => {
-    responseHandler(message, message.key, result, result);
-  });
-
-  if (socket.connected) {
-    socket.emit("joinRoom", message.key);
-  } else {
-    socket.on("connect", () => socket.emit("joinRoom", message.key));
-  }
+	socket.on("joinRoom", (result) => {
+		responseHandler(message, message.key, result, result);
+	});
 }
 
 function destroy() {
-  console.log("destroy ran");
+	console.log("destroy ran");
 
-  window.removeEventListener("message", onMessage);
-  document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
-  
-  delete window.__injected__content__;
-  
-  socket.close();
-  videoSync.destroy();
+	window.removeEventListener("message", onMessage);
+	document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
+
+	delete window.__injected__content__;
+
+	socket.close();
+	videoSync.destroy();
 }
 
 // Helper functions
 
 function responseHandler(message, key, data, eventSuccessful = true) {
-  console.log("responseHandler ran");
+	console.log("responseHandler ran");
 
-  message.data = data;
+	message.data = data;
+	sendChromeRuntimeMessage(message);
 
-  chrome.runtime.sendMessage(message);
-  if (eventSuccessful) {
-    let proxyMessage = proxy.updateExtInfo;
+	if (eventSuccessful) {
+		let proxyMessage = proxy.updateExtInfo;
 
-    proxyMessage.from = "content";
-    proxyMessage.newInfo = {
-      page: "connected",
-      key: key,
-    };
+		proxyMessage.scriptId = scriptId;
+		proxyMessage.newInfo = {
+			page: "connected",
+			key: key,
+		};
 
-    messagingWindow.postMessage(proxyMessage, "*");
+		messagingWindow.postMessage(proxyMessage, "*");
 
-    videoSync = sync(socket);
-  }
+		videoSync = sync(socket);
+	}
 }
 
 function setUpSource() {
-  console.log("found frame with video");
-
-  window.addEventListener("message", onMessage);
-
-  let iframeCheck = isIframe(window.self);
-
-  messagingWindow = iframeCheck ? window.parent : window.self;
+	console.log("found frame with video");
 
   let message = proxy.bindSource;
+	let iframeCheck = isIframe(window.self);
 
-  message.from = "content";
-  message.isIframe = iframeCheck;
-  message.origin = window.location.href;
+	messagingWindow = iframeCheck ? window.parent : window.self;
 
-  messagingWindow.postMessage(message, "*");
+	message.scriptId = scriptId;
+	message.isIframe = iframeCheck;
+	message.origin = window.location.href;
+
+  window.addEventListener("message", onMessage);
+	messagingWindow.postMessage(message, "*");
 }
 
 // Event listners;
 
 function onDOMNodeInserted(event) {
-  if (event.target.nodeName === "VIDEO") {
-    setUpSource();
-    document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
-  }
+	if (event.target.nodeName === "VIDEO") {
+		setUpSource();
+		document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
+	}
 }
 
-function onMessage(event) {
-  let message = event.data;
-  delete message.request;
+//Main
 
-  console.log("message recieved");
-
-  if (message.from === "proxy") {
-    functionMap[message.response](message);
-  }
+function main() {
+	if (window.location.href !== "about:blank" && !window.__injected__content__) {
+		window.__injected__content__ = true;
+		init();
+	}
 }
 
-runAfterDocumentLoad(() => {
-
-  console.log('content script injected');
-  console.log(window.location.href);
-  console.log('injected')
-
-  if (!window.__injected__content__) {
-    init();
-  }
-});
+// Start polling
+pollForDocumentReadyState(main);

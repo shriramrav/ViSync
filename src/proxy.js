@@ -1,114 +1,127 @@
-import { getInfo, proxyIsInitialized, updateInfo, removeInfo } from "./modules/extension";
-import { proxy, injectContent, initializeProxyIfNeeded, server } from "./modules/messages";
 import {
-  getIframeFromSrc,
-  runAfterDocumentLoad,
+	getInfo,
+	proxyIsInitialized,
+	updateInfo,
+	removeInfo,
+} from "./modules/extension";
+
+import {
+	proxy,
+	injectContent,
+	initializeProxyIfNeeded,
+	server,
+} from "./modules/messages";
+
+import {
+	getIframeFromSrc,
+	iframesSetOnLoad,
+	pollForDocumentReadyState,
+	pollForHrefChange,
 } from "./modules/documentHelpers";
+import { rejectErrors } from "./modules/utility";
+import { getRuntimeMessenger, getMessageEventHandler } from "./modules/getters";
 
 let sources = [];
-
-const tabId = getInfo({}, false).tabId;
-const channelName = `visync-${tabId}`;
-
 let channel;
+let hrefPollingStarted = false;
 
 const functionMap = {
-  [proxy.bindSource.response]: bindSource,
-  [proxy.updateExtInfo.response]: updateExtInfo,
-  [server.createRoom.response]: sendMessageToSource,
-  [server.joinRoom.response]: sendMessageToSource,
-  [server.destroy.response]: destroy,
+	[proxy.bindSource.response]: bindSource,
+	[proxy.updateExtInfo.response]: updateExtInfo,
+	[server.createRoom.response]: sendMessageToSource,
+	[server.joinRoom.response]: sendMessageToSource,
+	// [server.connect.response]: sendMessageToSource,
+	// [server.disconnectIfNeeded.response]: sendMessageToSource,
+	[server.destroy.response]: destroy,
 };
 
+const scriptId = "proxy";
+const tabId = getInfo({}, false).tabId;
+const channelName = `visync-${tabId}`;
+const href = document.location.href;
+const sendChromeRuntimeMessage = getRuntimeMessenger(scriptId, tabId);
+const onMessage = getMessageEventHandler(scriptId, functionMap);
+
 function init() {
-  channel = new BroadcastChannel(channelName);
+	channel = new BroadcastChannel(channelName);
 
-  // Bind event listeners
-  channel.onmessage = onMessage;
-  window.addEventListener("message", onMessage);
-  document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
+	// Bind event listeners
+	channel.onmessage = onMessage;
+	window.addEventListener("message", onMessage);
+	document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
 
-  updateInfo({ proxyIsInitialized: true });
-
-  let message = injectContent;
-
-  message.tabId = tabId;
-
-  chrome.runtime.sendMessage(injectContent);
+	updateInfo({ proxyIsInitialized: true });
+	sendChromeRuntimeMessage(injectContent);
+	iframesSetOnLoad(onLoad);
 }
 
 // Response functions
 
 function bindSource(message) {
-  sources.push({
-    messagingWindow: message.isIframe
-      ? getIframeFromSrc(message.origin).contentWindow
-      : window.self,
-  });
+	sources.push({
+		messagingWindow: message.isIframe
+			? getIframeFromSrc(message.origin).contentWindow
+			: window.self,
+	});
 
-  updateInfo({ page: "main" });
+	updateInfo({ page: "main" });
 
-  console.log(sources);
+	if (!hrefPollingStarted) {
+		pollForHrefChange(onHrefChange);
+		hrefPollingStarted = true;
+	}
 }
 
 function sendMessageToSource(message) {
-  console.log("sendMessageToSource started");
-
-  sources[0].messagingWindow.postMessage(message, "*");
+	sources[0].messagingWindow.postMessage(message, "*");
 }
 
 function updateExtInfo(message) {
-  updateInfo(message.newInfo);
+	updateInfo(message.newInfo);
 }
 
 function destroy(message) {
-  removeInfo();
-  window.removeEventListener("message", onMessage);
-  document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
-  channel.close();
-  sendMessageToSource(message);
-  
+	window.removeEventListener("message", onMessage);
+	document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
+	channel.close();
 
-  message = initializeProxyIfNeeded;
-  message.tabId = tabId;
-
-  chrome.runtime.sendMessage(message);
+	removeInfo();
+	rejectErrors(() => sendMessageToSource(message));
+	sendChromeRuntimeMessage(initializeProxyIfNeeded);
 }
-
 
 // Event listeners
 
 function onDOMNodeInserted(event) {
-  const reinjectNodes = ["IFRAME"];
+	const reinjectNodes = ["IFRAME"];
 
-  if (reinjectNodes.includes(event.target.nodeName)) {
-    event.target.onload = function () {
-      let message = injectContent;
-
-      message.tabId = tabId;
-
-      chrome.runtime.sendMessage(injectContent);
-    };
-  }
+	if (reinjectNodes.includes(event.target.nodeName)) {
+		event.target.onload = onLoad;
+	}
 }
 
-function onMessage(event) {
-  let message = event.data;
-
-  if (message.from === "sw" || message.from === "content") {
-    message.from = "proxy";
-
-    functionMap[message.response](message);
-  }
+function onHrefChange() {
+	if (href !== window.location.href) {
+		console.log(href);
+		console.log(window.location.href);
+		console.log("href change happened");
+		let message = server.destroy;
+		message.scriptId = scriptId;
+		destroy(message);
+	}
 }
 
-runAfterDocumentLoad(() => {
-  if (!proxyIsInitialized()) {
+function onLoad() {
+	sendChromeRuntimeMessage(injectContent);
+}
 
-    console.log('proxy wasnt initialized');
+//Main
 
-    init();
-  }
-});
+function main() {
+	if (!proxyIsInitialized()) {
+		init();
+	}
+}
 
-console.log("Proxy Script Running");
+// Start polling
+pollForDocumentReadyState(main);
