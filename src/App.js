@@ -7,23 +7,30 @@ import Failure from "./components/Failure";
 import Join from "./components/Join";
 
 import { requestResponseSendMessage } from "./modules/requestResponse";
-import { getExtensionInfo, injectContent } from "./modules/messages";
+import { getExtensionInfo } from "./modules/messages";
 
 function App(props) {
   const [key, setKey] = useState("");
+  const [tabId, setTabId] = useState(null);
 
   let navigate = useNavigate();
   let keyHandler = (newkey) => setKey(newkey);
+  // let tabIdHandler = ()
+  
+  let childProps = {
+    keyHandler: keyHandler,
+    keyValue: key,
+    tabId: tabId
+  }
 
   useEffect(() => {
     requestResponseSendMessage(getExtensionInfo).then((result) => {
-      console.log('afsdfasdfas');
+      // setTabId()
+      console.log('request Response message');
+      console.log(result);
+      setTabId(result.tabId);
       setKey(result.key);
       navigate(`/${result.page}`);
-
-      if (result.initialized != undefined) {
-        chrome.runtime.sendMessage(injectContent);
-      }
     });
   }, []);
 
@@ -31,9 +38,9 @@ function App(props) {
     <Routes>
       <Route exact path="/" element={<></>} />
       <Route exact path="/failure" element={<Failure />} />
-      <Route exact path="/main" element={<Main keyHandler={keyHandler} />} />
-      <Route exact path="/connected" element={<Connected keyValue={key} />} />
-      <Route exact path="/join" element={<Join keyHandler={keyHandler} />} />
+      <Route exact path="/main" element={<Main {...childProps} />} />
+      <Route exact path="/connected" element={<Connected {...childProps} />} />
+      <Route exact path="/join" element={<Join {...childProps} />} />
     </Routes>
   );
 }

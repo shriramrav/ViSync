@@ -4,8 +4,6 @@ function requestResponseSendMessage(message) {
 
     const listener = (event) => {
       if (event.response === message.response) {
-        console.log("request response ran");
-
         chrome.runtime.onMessage.removeListener(listener);
         resolve(event.data);
       }

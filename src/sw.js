@@ -1,71 +1,109 @@
 import * as m from "./modules/messages";
-import { rejectErrors } from "./modules/utility";
 import { injectFile, getActiveTab, injectFunc } from "./modules/swHelpers";
-import * as ext from "./modules/injected";
+import * as ext from "./modules/extension";
+import { generateRandomKey } from "./modules/keys";
 
 let currentTab;
+// let scriptId = generateRandomKey();
 
-const functionMap = {
+let scriptId = "sw";
+
+let functionMap = {
   [m.getExtensionInfo.response]: getExtensionInfo,
   [m.server.createRoom.response]: bcPostMessage,
   [m.server.joinRoom.response]: bcPostMessage,
-  [m.server.destroy.response]: destroy,
+  // [m.server.connect.response]: bcPostMessage,
+  // [m.server.disconnectIfNeeded.response]: bcPostMessage,
+  [m.server.destroy.response]: bcPostMessage,
   [m.injectContent.response]: injectContent,
+  [m.initializeProxyIfNeeded.response]: initializeProxyIfNeeded,
 };
 
 // Response functions
 
-function getExtensionInfo(message) {
-  console.log(currentTab.url);
-  console.log(currentTab.url.includes("https://"));
+async function getExtensionInfo(message) {
+  message.tabId = currentTab.id;
 
-  const { url, id } = currentTab;
+  console.log("inside getExtensionInfo");
+  console.log(message.tabId);
 
-  if (url.includes("https://")) {
-    injectFunc(id, ext.getInfo, Object.assign(message, { tabId: id }));
+  const tab = await chrome.tabs.get(message.tabId);
+
+  if (tab.url.includes("https://")) {
+    injectFunc(message.tabId, ext.getInfo, message);
   } else {
-    chrome.runtime.sendMessage(
-      // Default page
-      Object.assign(message, { data: { page: "failure" } })
-    );
+    message.data = {
+      page: "failure",
+    };
+
+    chrome.runtime.sendMessage(message);
   }
 }
 
 function bcPostMessage(message) {
-  const { id } = currentTab;
-
-  injectFunc(id, ext.postMessage, message, id);
+  injectFunc(message.tabId, ext.postMessage, message, message.tabId);
 }
 
-function injectContent() {
-  injectFile(currentTab.id, "content.js");
+function injectContent(message) {
+  injectFile(message.tabId, "content.js", true);
 }
 
-function destroy(message) {
-  console.log("recieved server destroy message");
+function initializeProxyIfNeeded(message) {
+  console.log("initalizeProxy if needed ran");
 
-  injectFunc(currentTab.id, ext.removeInfo);
-  bcPostMessage(message);
+  let tabId = message.tabId;
+
+  injectFunc(tabId, ext.getInfo, { tabId: tabId }, false).then(() => {
+    injectFile(tabId, "proxy.js");
+  });
 }
+
+// Helper functions
 
 // Event listener functions
 
 async function onMessage(message) {
-  if (message.request != undefined) {
+  if (
+    message.request !== undefined ||
+    (message.scriptId != undefined &&
+      !message.scriptId.includes("content-") &&
+      message.scriptId !== scriptId)
+  ) {
+    console.log("inside sw onmessage::");
+    console.log(message);
+
+    // Change to get tabdata from message later
     currentTab = await getActiveTab();
 
     delete message.request;
 
-    console.log(message);
-    console.log(currentTab);
+    // Attach script id;
+    message.scriptId = scriptId;
 
-    rejectErrors(() => functionMap[message.response](message));
+    functionMap[message.response](message);
   }
 }
 
-// check for url
+function onActivated(tabInfo) {
+  initializeProxyIfNeeded(tabInfo);
+}
+
+function onUpdated(tabId, docInfo, tab) {
+  if (tab.url !== undefined && docInfo.status == "complete") {
+    initializeProxyIfNeeded({ tabId: tabId });
+  }
+}
+
+// Binds event listeners
 
 chrome.runtime.onMessage.addListener(onMessage);
-chrome.tabs.onActivated.addListener((obj) => console.log(obj));
+chrome.tabs.onActivated.addListener(onActivated);
+chrome.tabs.onUpdated.addListener(onUpdated);
 
 console.log("Service Worker Running");
+
+// TODO
+
+// make destroy run on url change
+
+// connect socket when popup loads

@@ -14,7 +14,7 @@
   },
   "web_accessible_resources": [
     {
-        "resources": ["content.js"],
+        "resources": ["content.js", "proxy.js"],
         "matches": ["<all_urls>"]
     }
   ]

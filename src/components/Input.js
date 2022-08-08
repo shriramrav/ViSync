@@ -8,7 +8,7 @@ function Input(props) {
     className: "input",
     type: "text",
     defaultValue: props.defaultValue,
-    maxLength: 20,
+    maxLength: 15,
     spellCheck: "false",
     ref: ref,
     onClick: (e) => e.target.select(),
