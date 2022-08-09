@@ -6,11 +6,11 @@ function Connected(props) {
 	return (
 		<Input
 			text="You have successfully joined a room! To add others, share the following key."
-			inputProps={{ defaultValue: props.keyValue }}
+			inputProps={{ defaultValue: props.keyValue, disabled: true }}
 			buttonProps={{
 				text: "Disconnect",
 				onClick: () => {
-					console.log("clicked");
+					// console.log("clicked");
 
 					let message = server.destroy;
 					message.tabId = props.tabId;

@@ -7,7 +7,7 @@ import Failure from "./components/Failure";
 import Join from "./components/Join";
 
 import { requestResponseSendMessage } from "./modules/requestResponse";
-import { getExtensionInfo } from "./modules/messages";
+import { getExtensionInfo, server } from "./modules/messages";
 
 function App(props) {
   const [key, setKey] = useState("");
@@ -26,11 +26,27 @@ function App(props) {
   useEffect(() => {
     requestResponseSendMessage(getExtensionInfo).then((result) => {
       // setTabId()
-      console.log('request Response message');
-      console.log(result);
+      // console.log('request Response message');
+      // console.log(result);
       setTabId(result.tabId);
       setKey(result.key);
       navigate(`/${result.page}`);
+
+      if (result.page === 'main') {
+
+        let message = server.connect;
+        message.tabId = result.tabId;
+
+        chrome.runtime.sendMessage(message);
+        window.addEventListener('beforeunload', () => {
+
+          message = server.disconnectIfNeeded;
+          message.tabId = result.tabId;
+
+          chrome.runtime.sendMessage(message);
+        })
+      }
+
     });
   }, []);
 

@@ -3,6 +3,9 @@
   "name": "ViSync",
   "version": "0.01",
   "description": "A way to synchronize video streams",
+  "icons":{
+    "512": "icon.png"
+  },
   "background": {
     "service_worker": "sw.js",
     "type": "module"

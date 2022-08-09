@@ -15,8 +15,8 @@ const initializeProxyIfNeeded = {
 
 const server = {
   connect: {
-    request: "wljND7sgav",
-    response: "SDL1Ik0p0P",
+    request: "BZ06iCFNGf",
+    response: "3uZoQspj5i",
   },
   createRoom: {
     request: "tIVSkVefJp",
@@ -25,10 +25,6 @@ const server = {
   joinRoom: {
     request: "WSgIRSmc05",
     response: "ewwRzm7c1B",
-  },
-  disconnectIfNeeded: {
-    request: 'XpmyNvCv4A',
-    response: 'qQcg2ILvdM'
   },
   destroy: {
     request: "rKJCNCTLqK",
@@ -46,9 +42,6 @@ const proxy = {
     response: "SDL1Ik0p0P",
   },
 };
-
-// BZ06iCFNGf
-// 3UZoQspj5i
 
 export {
   server,

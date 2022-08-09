@@ -24,7 +24,7 @@ function Main(props) {
     message.tabId = props.tabId;
 
     requestResponseSendMessage(message).then((result) => {
-      console.log(result);
+      // console.log(result);
       props.keyHandler(result);
       navigate("../connected");
     });

@@ -29,8 +29,8 @@ function Join(props) {
     message.tabId = props.tabId;
 
     requestResponseSendMessage(message).then((result) => {
-      console.log("result::::");
-      console.log(result);
+      // console.log("result::::");
+      // console.log(result);
 
       if (result) {
         props.keyHandler(input.value);
@@ -46,7 +46,7 @@ function Join(props) {
       }
     });
 
-    console.log("loading");
+    // console.log("loading");
   };
 
   let buttonProps = {

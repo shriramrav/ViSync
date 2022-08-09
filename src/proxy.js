@@ -1,9 +1,4 @@
-import {
-	getInfo,
-	proxyIsInitialized,
-	updateInfo,
-	removeInfo,
-} from "./modules/extension";
+import * as storage from "./modules/storage";
 
 import {
 	proxy,
@@ -30,19 +25,21 @@ const functionMap = {
 	[proxy.updateExtInfo.response]: updateExtInfo,
 	[server.createRoom.response]: sendMessageToSource,
 	[server.joinRoom.response]: sendMessageToSource,
-	// [server.connect.response]: sendMessageToSource,
-	// [server.disconnectIfNeeded.response]: sendMessageToSource,
+	[server.connect.response]: sendMessageToSource,
 	[server.destroy.response]: destroy,
 };
 
 const scriptId = "proxy";
-const tabId = getInfo({}, false).tabId;
+const tabId = storage.get("tabId");
 const channelName = `visync-${tabId}`;
 const href = document.location.href;
 const sendChromeRuntimeMessage = getRuntimeMessenger(scriptId, tabId);
 const onMessage = getMessageEventHandler(scriptId, functionMap);
 
 function init() {
+	// console.log("proxy init running");
+	// console.log(tabId);
+
 	channel = new BroadcastChannel(channelName);
 
 	// Bind event listeners
@@ -50,7 +47,7 @@ function init() {
 	window.addEventListener("message", onMessage);
 	document.addEventListener("DOMNodeInserted", onDOMNodeInserted);
 
-	updateInfo({ proxyIsInitialized: true });
+	storage.update({ proxyIsInitialized: true });
 	sendChromeRuntimeMessage(injectContent);
 	iframesSetOnLoad(onLoad);
 }
@@ -64,7 +61,10 @@ function bindSource(message) {
 			: window.self,
 	});
 
-	updateInfo({ page: "main" });
+	// console.log("bindSOurce ran");
+	// console.log(message);
+
+	storage.update({ page: "main" });
 
 	if (!hrefPollingStarted) {
 		pollForHrefChange(onHrefChange);
@@ -77,15 +77,20 @@ function sendMessageToSource(message) {
 }
 
 function updateExtInfo(message) {
-	updateInfo(message.newInfo);
+	// console.log("inside updateInfo:");
+	// console.log(message);
+
+	storage.update(message.newInfo);
 }
 
 function destroy(message) {
+	delete window.__injected_proxy__;
+
 	window.removeEventListener("message", onMessage);
 	document.removeEventListener("DOMNodeInserted", onDOMNodeInserted);
 	channel.close();
+	storage.remove("page");
 
-	removeInfo();
 	rejectErrors(() => sendMessageToSource(message));
 	sendChromeRuntimeMessage(initializeProxyIfNeeded);
 }
@@ -102,9 +107,9 @@ function onDOMNodeInserted(event) {
 
 function onHrefChange() {
 	if (href !== window.location.href) {
-		console.log(href);
-		console.log(window.location.href);
-		console.log("href change happened");
+		// console.log(href);
+		// console.log(window.location.href);
+		// console.log("href change happened");
 		let message = server.destroy;
 		message.scriptId = scriptId;
 		destroy(message);
@@ -118,8 +123,10 @@ function onLoad() {
 //Main
 
 function main() {
-	if (!proxyIsInitialized()) {
+	if (window.__injected_proxy__ === undefined) {
+		window.__injected_proxy__ = true;
 		init();
+		console.log('New Proxy Script Running');
 	}
 }
 
