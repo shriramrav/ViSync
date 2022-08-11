@@ -18,7 +18,7 @@
 
 <p align="center">
 <a href="#Features">Features</a> •
-<a href="#IAU">Installation & Usage</a> •
+<a href="#Features">Installation & Usage</a> •
   <a href="#Credits">Credits</a> 
 </p>
 
