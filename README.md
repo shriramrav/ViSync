@@ -7,7 +7,7 @@
   <br>
 </h1>
 
-<h4 align="center">A chrome extension to synchronize video players in real-time.</h4>
+<h4 align="center">A chrome extension to synchronize video players in realtime.</h4>
 
 <p align="center">
   <a href="https://github.com/shriramrav/ViSync/blob/master/LICENSE.txt">
