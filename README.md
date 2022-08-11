@@ -18,7 +18,7 @@
 
 <p align="center">
 <a href="#Features">Features</a> •
-<a href="#iau">Installation & Usage</a> •
+<a href="#IAU">Installation & Usage</a> •
   <a href="#Credits">Credits</a> 
 </p>
 
@@ -34,7 +34,7 @@
 - Automatic server connection upon opening the main page to reduce time spent while creating/joining rooms
 	- (Inactivity on the main page will cause the client to disconnect after 30 seconds)  
 
-<a name="#iau" ></a>
+<a id="#Installation-And-Usage" ></a>
 ## Installation & Usage
 - First, [download](https://github.com/shriramrav/ViSync/releases/download/v1.0.0/ViSync.zip) the zip file containing the unpacked extension.
 - After unzipping the file, navigate to the page `chrome://extensions` and use the "**Load unpacked**" button to add the extension to your browser.
