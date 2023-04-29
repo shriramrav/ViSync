@@ -46,3 +46,4 @@ If you find an issue, please create a new issue on this repository page to help 
 <a id="#Credits" ></a>
 ## Credits
 - Special thanks to [Aarya Patel](https://github.com/AAP2003) for providing insightful knowledge regarding Chrome Manifest V3.
+
